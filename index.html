@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#000000" id="meta-theme-color" />
+    <title>varcity</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="manifest" href="./manifest.json" />
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(err => {
+            console.warn('Service worker registration failed:', err);
+          });
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div id="app">
+      <!-- Top Header -->
+      <header class="app-header">
+        <h1 class="app-title">varcity.</h1>
+        <div style="display:flex; gap: 8px;">
+          <button id="theme-toggle" class="icon-btn" aria-label="Toggle Theme">
+            <i class="ri-sun-line" id="theme-icon"></i>
+          </button>
+          <button id="btn-settings" class="icon-btn" aria-label="Impostazioni">
+            <i class="ri-settings-4-line"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Content Container -->
+      <main class="main-content">
+        
+        <!-- View: Dashboard -->
+        <section id="view-dashboard" class="view-section active">
+          <div class="greeting-section" style="margin-bottom: 2rem;">
+            <h2 id="greeting-text" style="margin-bottom: 0.2rem; font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px;">Overview.</h2>
+          </div>
+
+          <div class="widget-grid">
+            <!-- Widget: Voti (GPA) -->
+            <div class="widget widget-large">
+              <div class="widget-header">
+                <h3>Media Ponderata</h3>
+                <i class="ri-bar-chart-2-line"></i>
+              </div>
+              <div class="widget-body">
+                <p class="widget-value highlight" id="stat-weighted-gpa">0.00</p>
+                <p class="widget-sub" id="stat-arithmetic-gpa" style="margin-bottom: 12px;">Aritmetica: 0.00</p>
+                
+                <div id="widget-user-info" style="display:none; align-items:center; gap:6px; background:var(--bg-color); padding:6px 12px; border-radius:20px; font-size:0.75rem; font-weight:600; color:var(--text-main); border:1px solid var(--border-color); width:fit-content; margin-top: auto;">
+                  <i class="ri-graduation-cap-line" style="font-size:1rem; color:var(--accent);"></i>
+                  <span id="widget-user-text" style="opacity: 0.9;"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Widget: Grafico Andamento -->
+            <div class="widget widget-large" id="widget-chart-container" style="padding: 1.5rem 0.5rem 0.5rem; height: 110px; position: relative; transition: height 0.3s cubic-bezier(0.25, 1, 0.5, 1);">
+              <button class="icon-btn" id="btn-toggle-chart" style="position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; min-height: 0; padding: 0; background: transparent; border: none; cursor: pointer;">
+                <i class="ri-expand-up-down-line" id="chart-toggle-icon" style="font-size: 1.2rem; color: var(--text-muted);"></i>
+              </button>
+              <canvas id="trend-chart"></canvas>
+            </div>
+
+            <!-- Widget: CFU -->
+            <div class="widget widget-small">
+              <div class="widget-header">
+                <h3>CFU</h3>
+                <i class="ri-checkbox-circle-line"></i>
+              </div>
+              <div class="widget-body">
+                <p class="widget-value"><span id="stat-credits">0</span></p>
+                <p class="widget-sub">Totali</p>
+              </div>
+            </div>
+
+            <!-- Widget: Esami Superati -->
+            <div class="widget widget-small">
+              <div class="widget-header">
+                <h3>Esami</h3>
+                <i class="ri-book-read-line"></i>
+              </div>
+              <div class="widget-body">
+                <p class="widget-value" id="stat-exams-count">0</p>
+                <p class="widget-sub">Superati</p>
+              </div>
+            </div>
+
+            <!-- Widget: Simulatore Rapido -->
+            <div class="widget widget-large action-widget" id="widget-simulator">
+              <div class="widget-header">
+                <h3>Simulatore Rapido</h3>
+                <i class="ri-magic-line"></i>
+              </div>
+              <div class="widget-body sim-quick">
+                <div class="sim-quick-inputs">
+                  <input type="number" id="quick-sim-grade" placeholder="Voto" min="18" max="30" />
+                  <input type="number" id="quick-sim-credits" placeholder="CFU" min="1" max="20" />
+                </div>
+                <button id="btn-quick-sim" class="btn-primary btn-small">Calcola</button>
+                <p class="sim-quick-result" id="quick-sim-result">Nuova media: -</p>
+              </div>
+            </div>
+
+            <!-- Widget: Prossima Scadenza Tasse -->
+            <div class="widget widget-large">
+              <div class="widget-header">
+                <h3>Prossima Tassa</h3>
+                <i class="ri-wallet-3-line"></i>
+              </div>
+              <div class="widget-body" id="widget-next-tax">
+                <div class="lesson-preview">
+                  <p class="widget-sub">Nessuna tassa in scadenza.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Widget: Prossima Lezione -->
+            <div class="widget widget-large">
+              <div class="widget-header">
+                <h3>Prossima Lezione</h3>
+                <i class="ri-time-line"></i>
+              </div>
+              <div class="widget-body" id="widget-next-lesson">
+                <div class="lesson-preview">
+                  <p class="widget-sub">Nessuna lezione in programma a breve.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- View: Study Plan (Curriculum Unificato) -->
+        <section id="view-plan" class="view-section">
+          <div class="section-header">
+            <h2>Piano Completo</h2>
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+              <button class="icon-btn" id="btn-toggle-reorder" aria-label="Modalità riordino" title="Attiva/Disattiva Riordino">
+                <i class="ri-list-check-2"></i>
+              </button>
+              <button class="btn-outline" id="btn-import-pdf" aria-label="Importa da PDF" style="padding: 8px 16px; font-size: 0.9rem;">
+                <i class="ri-file-pdf-line"></i> Importa
+              </button>
+              <button class="icon-btn" id="btn-add-curriculum" aria-label="Aggiungi elemento">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+          </div>
+          <div class="list-container" id="plan-list">
+            <div class="empty-state">Il tuo curriculum è vuoto.</div>
+          </div>
+        </section>
+
+        <!-- View: Schedule -->
+        <section id="view-schedule" class="view-section">
+          <div class="section-header">
+            <h2>Orario Lezioni</h2>
+            <button class="icon-btn" id="btn-add-lesson" aria-label="Aggiungi lezione"><i class="ri-add-line"></i></button>
+          </div>
+          <div class="list-container" id="schedule-list">
+            <div class="empty-state">Nessuna lezione in programma oggi.</div>
+          </div>
+        </section>
+
+        <!-- View: Taxes -->
+        <section id="view-taxes" class="view-section">
+          <div class="section-header">
+            <h2>Tasse e Retribuzioni</h2>
+            <button class="icon-btn" id="btn-add-tax" aria-label="Aggiungi Tassa"><i class="ri-add-line"></i></button>
+          </div>
+          <div class="list-container" id="taxes-list">
+            <div class="empty-state">Nessuna tassa registrata.</div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Bottom Navigation -->
+      <nav class="bottom-nav">
+        <div class="nav-item active" data-view="dashboard">
+          <i class="ri-home-4-line"></i>
+          <span>Home</span>
+        </div>
+        <div class="nav-item" data-view="plan">
+          <i class="ri-book-line"></i>
+          <span>Piano</span>
+        </div>
+        <div class="nav-item" data-view="schedule">
+          <i class="ri-calendar-event-fill"></i>
+          <span>Orario</span>
+        </div>
+        <div class="nav-item" data-view="taxes">
+          <i class="ri-wallet-3-fill"></i>
+          <span>Tasse</span>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Modal for adding curriculum item -->
+    <div class="modal-overlay" id="modal-add-curriculum">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Nuovo Elemento Piano</h3>
+          <button class="btn-close" id="btn-close-curr"><i class="ri-close-line"></i></button>
+        </div>
+        <form id="form-add-curriculum" class="minimal-form">
+          <div class="form-row" style="margin-bottom:1rem;">
+            <div class="form-group">
+              <label>Stato</label>
+              <select id="input-status" class="minimal-select" required>
+                <option value="passed">Già Superato</option>
+                <option value="planned">Da Sostenere</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Anno Accademico</label>
+              <select id="input-year" class="minimal-select" required>
+                <option value="1">1° Anno</option>
+                <option value="2">2° Anno</option>
+                <option value="3">3° Anno</option>
+                <option value="4">4° Anno</option>
+                <option value="5">5° Anno</option>
+                <option value="6">6° Anno</option>
+                <option value="7">Fuoricorso</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-bottom:1rem;">
+            <div class="form-group">
+              <label>Tipo Valutazione</label>
+              <select id="input-type" class="minimal-select" required>
+                <option value="standard">Esame Standard (Con Voto)</option>
+                <option value="idoneita">Idoneità / Laboratorio</option>
+                <option value="uaf">UAF (Ulteriori Attività Formative)</option>
+                <option value="tesi">Tesi di Laurea</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Semestre</label>
+              <select id="input-semester" class="minimal-select" required>
+                <option value="1">I Semestre</option>
+                <option value="2">II Semestre</option>
+                <option value="0">Annuale / Nessuno</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Materia / Attività</label>
+            <input type="text" id="input-subject" required placeholder="Nome materia" />
+          </div>
+
+          <div class="form-row" id="grade-row">
+            <div class="form-group">
+              <label>Voto</label>
+              <input type="number" id="input-grade" min="18" max="30" placeholder="18-30" />
+            </div>
+            <div class="form-group" style="display:flex; align-items:flex-end;">
+              <div class="form-check" style="margin-bottom:0; height:54px; padding-left:8px;">
+                <input type="checkbox" id="input-lode" />
+                <label for="input-lode">Lode</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>CFU (Crediti)</label>
+              <input type="number" id="input-credits" min="1" max="60" required placeholder="es. 6" />
+            </div>
+            <div class="form-group" id="date-group">
+              <label>Data di superamento</label>
+              <input type="date" id="input-date" />
+            </div>
+          </div>
+          
+          <div class="form-group" id="appelli-group" style="display:none;">
+            <label>Date Appelli previsti (opzionale)</label>
+            <input type="text" id="input-appelli" placeholder="es. 15 Giu, 12 Lug" />
+          </div>
+
+          <div class="form-group" id="unconfirmed-group" style="display:none; margin-top: 1rem;">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="input-unconfirmed">
+              <span class="checkmark"></span>
+              Segna come materia a scelta in attesa di conferma
+            </label>
+          </div>
+
+          <!-- Hidden inputs for promotion logic -->
+          <input type="hidden" id="input-editing-id" value="" />
+
+          <div style="display:flex; gap: 1rem; margin-top:1rem;">
+            <button type="button" class="btn-large" id="btn-delete-curriculum" style="display:none; background-color: var(--warning); color:#fff; border:none; border-radius:20px; font-weight:700; cursor:pointer; width: 100%;">Elimina</button>
+            <button type="submit" class="btn-primary w-100 btn-large">Salva nel Piano</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal for PDF Import Wizard -->
+    <div class="modal-overlay" id="modal-import-pdf">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Importazione Curriculum</h3>
+          <button class="btn-close" id="btn-close-import"><i class="ri-close-line"></i></button>
+        </div>
+        <div id="import-step-1" class="import-step active">
+          <p style="margin-bottom:1rem; color:var(--text-muted);">Carica il PDF del piano di studi fornito dalla tua Università per estrarre automaticamente il curriculum.</p>
+          <div class="form-group">
+            <input type="file" id="import-file" accept="application/pdf" style="display:none;" />
+            <label for="import-file" class="w-100 btn-large" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; cursor:pointer; background:var(--text-color); color:var(--bg-color); border:none; border-radius:12px; font-weight:600; transition:opacity 0.2s;">
+              <i class="ri-upload-cloud-2-line"></i> Seleziona file PDF
+            </label>
+          </div>
+          <div id="import-loading" style="display:none; text-align:center; margin-top:1rem; color:var(--text-muted);">
+            <i class="ri-loader-4-line ri-spin"></i> Analisi in corso...
+          </div>
+        </div>
+
+        <div id="import-step-2" class="import-step" style="display:none;">
+          <p style="margin-bottom:1rem; color:var(--text-muted);">Abbiamo individuato diversi indirizzi. Scegli il tuo percorso accademico:</p>
+          <div class="form-group">
+            <select id="import-path" class="minimal-select">
+              <option value="reporting">Reporting e controllo</option>
+              <option value="innovation">Imprenditorialità e innovazione</option>
+              <option value="marketing">Marketing management</option>
+            </select>
+          </div>
+          <button type="button" id="btn-import-next-1" class="btn-primary w-100 btn-large">Avanti <i class="ri-arrow-right-line"></i></button>
+        </div>
+
+        <div id="import-step-3" class="import-step" style="display:none;">
+          <p style="margin-bottom:1rem; color:var(--text-muted);">Scegli i tuoi esami a scelta:</p>
+          <div id="electives-container" class="form-group" style="display:flex; flex-direction:column; gap:0.5rem; max-height:40vh; overflow-y:auto; padding-right:10px;">
+            <!-- Generato dinamicamente -->
+          </div>
+          <button type="button" id="btn-import-finish" class="btn-primary w-100 btn-large">Genera Curriculum</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for adding lessons -->
+    <div class="modal-overlay" id="modal-add-lesson">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Nuova Lezione</h3>
+          <button class="btn-close" id="btn-close-lesson"><i class="ri-close-line"></i></button>
+        </div>
+        <form id="form-add-lesson" class="minimal-form">
+          <div class="form-group">
+            <label>Materia</label>
+            <input type="text" id="lesson-subject" required placeholder="Nome materia" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Giorno</label>
+              <select id="lesson-day" class="minimal-select" required>
+                <option value="1">Lunedì</option>
+                <option value="2">Martedì</option>
+                <option value="3">Mercoledì</option>
+                <option value="4">Giovedì</option>
+                <option value="5">Venerdì</option>
+                <option value="6">Sabato</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Aula</label>
+              <input type="text" id="lesson-room" required placeholder="es. Aula 3" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Ora Inizio</label>
+              <input type="time" id="lesson-start" required />
+            </div>
+            <div class="form-group">
+              <label>Ora Fine</label>
+              <input type="time" id="lesson-end" required />
+            </div>
+          </div>
+          <button type="submit" class="btn-primary w-100 btn-large">Aggiungi Lezione</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal for adding taxes -->
+    <div class="modal-overlay" id="modal-add-tax">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Nuova Tassa</h3>
+          <button class="btn-close" id="btn-close-tax"><i class="ri-close-line"></i></button>
+        </div>
+        <form id="form-add-tax" class="minimal-form">
+          <div class="form-group">
+            <label>Descrizione</label>
+            <input type="text" id="tax-desc" required placeholder="es. Seconda Rata" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Importo (€)</label>
+              <input type="number" step="0.01" id="tax-amount" required placeholder="0.00" />
+            </div>
+            <div class="form-group">
+              <label>Scadenza</label>
+              <input type="date" id="tax-date" required />
+            </div>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" id="tax-paid" />
+            <label for="tax-paid">Già pagata</label>
+          </div>
+          <button type="submit" class="btn-primary w-100 btn-large">Salva Tassa</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal for Settings -->
+    <div class="modal-overlay" id="modal-settings">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Impostazioni</h3>
+          <button class="btn-close" id="btn-close-settings"><i class="ri-close-line"></i></button>
+        </div>
+        <div class="minimal-form">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Il tuo nome</label>
+            <input type="text" id="settings-username" class="minimal-input" placeholder="Come ti chiami?" />
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Università</label>
+            <input type="text" id="settings-university" class="minimal-input" placeholder="es. Sapienza" />
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label>Corso di Laurea</label>
+            <input type="text" id="settings-degree-name" class="minimal-input" placeholder="es. Economia Aziendale" />
+          </div>
+
+          <div class="form-group">
+            <label>Valore della Lode (nel calcolo media)</label>
+            <select id="settings-lode-weight" class="minimal-select">
+              <option value="30">30</option>
+              <option value="31">31</option>
+              <option value="32">32</option>
+              <option value="33">33</option>
+            </select>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 2rem;">
+            Il valore assegnato alla lode dipende dal regolamento del tuo Ateneo. Spesso viene calcolata come 30, a volte attribuisce punti extra come 31 o 33.
+          </p>
+          <button type="button" id="btn-save-settings" class="btn-primary w-100 btn-large">Salva Impostazioni</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
