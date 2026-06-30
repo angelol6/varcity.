@@ -292,7 +292,9 @@ function setupAuthListeners() {
       if(isSignUp) {
         errorMsg.textContent = "Controlla la tua email per confermare l'account!";
         errorMsg.style.display = 'block';
-        errorMsg.style.color = 'var(--success-color)';
+        errorMsg.style.color = '#38bd71';
+      } else {
+        closeModals(); // Chiudi il modal al login avvenuto con successo
       }
     }
   };
