@@ -1466,19 +1466,6 @@ function openLessonModal() {
       });
       subjectSelect.appendChild(optGroup);
     }
-    
-    const passedExams = curriculum.filter(c => (!c.type || c.type === 'standard') && c.status === 'passed');
-    if (passedExams.length > 0) {
-      const optGroup = document.createElement('optgroup');
-      optGroup.label = "Già superati";
-      passedExams.forEach(exam => {
-        const option = document.createElement('option');
-        option.value = exam.name;
-        option.textContent = exam.name;
-        optGroup.appendChild(option);
-      });
-      subjectSelect.appendChild(optGroup);
-    }
   }
   modalAddLesson.classList.add('open');
 }
