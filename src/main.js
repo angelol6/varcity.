@@ -409,12 +409,12 @@ function setupSettings() {
 }
 
 // --- Modals Logic ---
-function setupModals() {
-  const openModal = (modal) => modal.classList.add('open');
-  const closeModals = () => {
-    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
-  };
+const openModal = (modal) => modal.classList.add('open');
+const closeModals = () => {
+  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
+};
 
+function setupModals() {
   // Triggers
   document.getElementById('btn-add-curriculum').addEventListener('click', () => {
     formAddCurriculum.reset();
