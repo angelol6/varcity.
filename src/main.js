@@ -1064,8 +1064,13 @@ function updateStats() {
   const cfuPercent = stats.globalTotalCredits > 0 ? Math.round((stats.totalCredits / stats.globalTotalCredits) * 100) : 0;
   const examsPercent = stats.globalTotalExamsCount > 0 ? Math.round((stats.count / stats.globalTotalExamsCount) * 100) : 0;
   
-  statCredits.innerHTML = `${stats.totalCredits} <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 400;">/ ${stats.globalTotalCredits} (${cfuPercent}%)</span>`;
-  statExamsCount.innerHTML = `${stats.count} <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 400;">/ ${stats.globalTotalExamsCount} (${examsPercent}%)</span>`;
+  statCredits.textContent = stats.totalCredits;
+  const statCreditsTotal = document.getElementById('stat-credits-total');
+  if (statCreditsTotal) statCreditsTotal.textContent = `/ ${stats.globalTotalCredits} (${cfuPercent}%)`;
+  
+  statExamsCount.textContent = stats.count;
+  const statExamsTotal = document.getElementById('stat-exams-total');
+  if (statExamsTotal) statExamsTotal.textContent = `/ ${stats.globalTotalExamsCount} (${examsPercent}%)`;
 }
 
 function renderCurriculumList() {
