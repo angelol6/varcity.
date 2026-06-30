@@ -463,11 +463,44 @@
           <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 2rem;">
             Il valore assegnato alla lode dipende dal regolamento del tuo Ateneo. Spesso viene calcolata come 30, a volte attribuisce punti extra come 31 o 33.
           </p>
-          <button type="button" id="btn-save-settings" class="btn-primary w-100 btn-large">Salva Impostazioni</button>
+          </div>
+      </div>
+      <button type="button" id="btn-save-settings" class="btn-primary w-100 btn-large">Salva Impostazioni</button>
+      <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+        <h3 style="font-size: 1rem; margin-bottom: 1rem;">Cloud Sync</h3>
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">Accedi o registrati per sincronizzare il tuo piano di studi nel cloud e usarlo su tutti i tuoi dispositivi.</p>
+        <button id="openAuthModalBtn" class="primary-btn" style="background-color: #242424; color: white;">Accedi a Supabase</button>
+        <div id="authStatusContainer" style="margin-top: 1rem; font-size: 0.85rem; color: var(--success-color); display: none;">
+          <p>Sei loggato come: <span id="authEmailDisplay"></span></p>
+          <button id="logoutBtn" style="margin-top: 0.5rem; padding: 0.5rem 1rem; border-radius: 6px; background-color: var(--danger-color); color: white; border: none; cursor: pointer;">Esci</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <script type="module" src="/src/main.js"></script>
+  <!-- Auth Modal -->
+  <div id="authModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Autenticazione Cloud</h2>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="authEmail" placeholder="La tua email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="authPassword" placeholder="La tua password">
+      </div>
+      <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+        <button id="loginBtn" class="primary-btn" style="flex: 1;">Accedi</button>
+        <button id="signupBtn" class="primary-btn" style="flex: 1; background-color: #242424; color: white;">Registrati</button>
+      </div>
+      <p id="authErrorMsg" style="color: var(--danger-color); font-size: 0.85rem; margin-top: 1rem; text-align: center; display: none;"></p>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
   </body>
 </html>

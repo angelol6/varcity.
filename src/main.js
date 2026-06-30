@@ -1,4 +1,5 @@
 import './style.css';
+import { supabase } from './supabase.js';
 
 // --- Data Migration (From old exams+plan to unified curriculum) ---
 function migrateData() {
@@ -44,6 +45,7 @@ function migrateData() {
 migrateData();
 
 // --- State Management ---
+let currentUser = null;
 let curriculum = JSON.parse(localStorage.getItem('varcity_curriculum')) || [];
 let lessons = JSON.parse(localStorage.getItem('varcity_schedule')) || [];
 let taxes = JSON.parse(localStorage.getItem('varcity_taxes')) || [];
@@ -55,10 +57,117 @@ let userDegreeName = localStorage.getItem('varcity_degree_name') || '';
 
 let trendChartInstance = null;
 
-function saveAll(key, data) {
+async function saveAll(key, data) {
+  // Always save locally first for offline support and immediate UI updates
   localStorage.setItem(key, JSON.stringify(data));
   updateUI();
+
+  // If logged in, sync to Supabase
+  if (currentUser && supabase) {
+    if (key === 'varcity_curriculum') {
+      try {
+        // Delete existing items for user and insert new ones
+        await supabase.from('curriculum').delete().eq('user_id', currentUser.id);
+        
+        if (data.length > 0) {
+          const insertData = data.map(item => ({
+            id: item.id,
+            user_id: currentUser.id,
+            status: item.status,
+            type: item.type || 'standard',
+            subject: item.subject,
+            credits: item.credits,
+            year: item.year,
+            semester: item.semester,
+            grade: item.grade,
+            is_lode: item.isLode,
+            date: item.date,
+            appelli: item.appelli || '',
+            unconfirmed: item.unconfirmed || false
+          }));
+          const { error } = await supabase.from('curriculum').insert(insertData);
+          if (error) console.error('Errore nel salvataggio su Supabase:', error);
+        }
+      } catch (err) {
+        console.error('Eccezione durante il sync:', err);
+      }
+    }
+  }
 }
+
+async function fetchCloudData() {
+  if (!currentUser || !supabase) return;
+  
+  const { data, error } = await supabase.from('curriculum').select('*').eq('user_id', currentUser.id);
+  if (error) {
+    console.error('Errore nel recupero dati:', error);
+    return;
+  }
+  
+  if (data && data.length > 0) {
+    // Override local with cloud data
+    curriculum = data.map(item => ({
+      id: item.id,
+      status: item.status,
+      type: item.type,
+      subject: item.subject,
+      credits: item.credits,
+      year: item.year,
+      semester: item.semester,
+      grade: item.grade,
+      isLode: item.is_lode,
+      date: item.date,
+      appelli: item.appelli,
+      unconfirmed: item.unconfirmed
+    }));
+    localStorage.setItem('varcity_curriculum', JSON.stringify(curriculum));
+    updateUI();
+  } else if (curriculum.length > 0) {
+    // First login: cloud is empty but local has data -> sync local UP to cloud
+    console.log('Migrating local data to cloud...');
+    saveAll('varcity_curriculum', curriculum);
+  }
+}
+
+async function checkAuth() {
+  if (!supabase) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  currentUser = session?.user || null;
+  
+  if (currentUser) {
+    await fetchCloudData();
+  }
+  
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    currentUser = session?.user || null;
+    if (event === 'SIGNED_IN') {
+      await fetchCloudData();
+      document.getElementById('authModal').classList.remove('open');
+    }
+    updateAuthUI();
+  });
+  
+  updateAuthUI();
+}
+
+function updateAuthUI() {
+  const btn = document.getElementById('openAuthModalBtn');
+  const statusContainer = document.getElementById('authStatusContainer');
+  const emailDisplay = document.getElementById('authEmailDisplay');
+  
+  if (btn && statusContainer && emailDisplay) {
+    if (currentUser) {
+      btn.style.display = 'none';
+      statusContainer.style.display = 'block';
+      emailDisplay.textContent = currentUser.email;
+    } else {
+      btn.style.display = 'block';
+      statusContainer.style.display = 'none';
+      emailDisplay.textContent = '';
+    }
+  }
+}
+
 
 // --- DOM Elements ---
 const htmlEl = document.documentElement;
@@ -127,7 +236,63 @@ function init() {
   setupSimulator();
   setupCurriculumFormToggles();
   setupChartToggle();
+  checkAuth();
+  setupAuthListeners();
   updateUI();
+}
+
+function setupAuthListeners() {
+  const btnOpen = document.getElementById('openAuthModalBtn');
+  const modal = document.getElementById('authModal');
+  const btnLogin = document.getElementById('loginBtn');
+  const btnSignup = document.getElementById('signupBtn');
+  const btnLogout = document.getElementById('logoutBtn');
+  const emailInput = document.getElementById('authEmail');
+  const passwordInput = document.getElementById('authPassword');
+  const errorMsg = document.getElementById('authErrorMsg');
+
+  if(btnOpen) btnOpen.addEventListener('click', () => {
+    if(!supabase) {
+      alert("Supabase non è ancora configurato. Aggiungi le chiavi nel file .env!");
+      return;
+    }
+    errorMsg.style.display = 'none';
+    modal.classList.add('open');
+  });
+
+  const handleAuth = async (isSignUp) => {
+    errorMsg.style.display = 'none';
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    if(!email || !password) {
+      errorMsg.textContent = "Inserisci email e password.";
+      errorMsg.style.display = 'block';
+      return;
+    }
+    
+    const { error } = isSignUp 
+      ? await supabase.auth.signUp({ email, password })
+      : await supabase.auth.signInWithPassword({ email, password });
+      
+    if(error) {
+      errorMsg.textContent = error.message;
+      errorMsg.style.display = 'block';
+    } else {
+      emailInput.value = '';
+      passwordInput.value = '';
+      if(isSignUp) {
+        errorMsg.textContent = "Controlla la tua email per confermare l'account!";
+        errorMsg.style.display = 'block';
+        errorMsg.style.color = 'var(--success-color)';
+      }
+    }
+  };
+
+  if(btnLogin) btnLogin.addEventListener('click', () => handleAuth(false));
+  if(btnSignup) btnSignup.addEventListener('click', () => handleAuth(true));
+  if(btnLogout) btnLogout.addEventListener('click', async () => {
+    await supabase.auth.signOut();
+  });
 }
 
 // --- Theme Logic ---
