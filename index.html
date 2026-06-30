@@ -261,7 +261,7 @@
         </div>
       </nav>
       <!-- Versione App -->
-      <div style="position: fixed; bottom: 80px; width: 100%; text-align: center; font-size: 10px; color: var(--text-muted); z-index: 1000; pointer-events: none;">v1.3.8</div>
+      <div style="position: fixed; bottom: 80px; width: 100%; text-align: center; font-size: 10px; color: var(--text-muted); z-index: 1000; pointer-events: none;">v1.3.9</div>
     </div>
 
     <!-- Modal for adding curriculum item -->
@@ -417,6 +417,7 @@
           <button class="btn-close" id="btn-close-lesson"><i class="ri-close-line"></i></button>
         </div>
         <form id="form-add-lesson" class="minimal-form">
+          <input type="hidden" id="lesson-edit-id" />
           <div class="form-group">
             <label>Materia</label>
             <select id="lesson-subject" class="minimal-select" required>
@@ -424,34 +425,50 @@
               <option value="" disabled selected>Seleziona una materia...</option>
             </select>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Giorno</label>
-              <select id="lesson-day" class="minimal-select" required>
-                <option value="1">Lunedì</option>
-                <option value="2">Martedì</option>
-                <option value="3">Mercoledì</option>
-                <option value="4">Giovedì</option>
-                <option value="5">Venerdì</option>
-                <option value="6">Sabato</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Aula</label>
-              <input type="text" id="lesson-room" required placeholder="es. Aula 3" />
+          
+          <div id="lesson-slots-container">
+            <div class="lesson-slot" style="background: var(--bg-main); padding: 1rem; border-radius: 12px; margin-bottom: 1rem; border: 1px solid var(--border-color); position: relative;">
+              <button type="button" class="btn-remove-slot icon-btn" style="position: absolute; top: 0.5rem; right: 0.5rem; display: none; color: var(--danger-color);" aria-label="Rimuovi orario">
+                <i class="ri-close-line"></i>
+              </button>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Giorno</label>
+                  <select class="minimal-select lesson-day-input" required>
+                    <option value="1">Lunedì</option>
+                    <option value="2">Martedì</option>
+                    <option value="3">Mercoledì</option>
+                    <option value="4">Giovedì</option>
+                    <option value="5">Venerdì</option>
+                    <option value="6">Sabato</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Aula</label>
+                  <input type="text" class="lesson-room-input" required placeholder="es. Aula 3" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Ora Inizio</label>
+                  <input type="time" class="lesson-start-input" required />
+                </div>
+                <div class="form-group">
+                  <label>Ora Fine</label>
+                  <input type="time" class="lesson-end-input" required />
+                </div>
+              </div>
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Ora Inizio</label>
-              <input type="time" id="lesson-start" required />
-            </div>
-            <div class="form-group">
-              <label>Ora Fine</label>
-              <input type="time" id="lesson-end" required />
-            </div>
-          </div>
-          <button type="submit" class="btn-primary w-100 btn-large">Aggiungi Lezione</button>
+          
+          <button type="button" id="btn-add-lesson-slot" class="btn-outline w-100" style="margin-bottom: 1rem; padding: 0.8rem; font-weight: 600;">
+            <i class="ri-add-line"></i> Aggiungi un altro orario
+          </button>
+          
+          <button type="submit" id="btn-save-lesson" class="btn-primary w-100 btn-large">Salva Lezione</button>
+          <button type="button" id="btn-delete-lesson" class="btn-danger w-100 btn-large" style="display:none; margin-top: 0.8rem; background: transparent; border: 1px solid var(--danger-color); color: var(--danger-color);">
+            <i class="ri-delete-bin-line"></i> Elimina
+          </button>
         </form>
       </div>
     </div>

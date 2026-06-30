@@ -714,7 +714,7 @@ function setupModals() {
     modalImportPdf.classList.remove('open');
   });
   
-  document.getElementById('btn-add-lesson').addEventListener('click', openLessonModal);
+  document.getElementById('btn-add-lesson').addEventListener('click', () => window.openLessonModal());
   document.getElementById('btn-add-tax').addEventListener('click', () => openModal(modalAddTax));
   
 
@@ -771,25 +771,54 @@ function setupModals() {
 
   formAddLesson.addEventListener('submit', (e) => {
     e.preventDefault();
+    const editId = document.getElementById('lesson-edit-id').value;
     let subjectName = document.getElementById('lesson-subject').value;
     if (subjectName === 'Altro...') {
       subjectName = prompt("Inserisci il nome della materia:");
       if (!subjectName || subjectName.trim() === '') return;
     }
-    lessons.push({
-      id: Date.now().toString(),
-      subject: subjectName.trim(),
-      day: parseInt(document.getElementById('lesson-day').value),
-      room: document.getElementById('lesson-room').value,
-      start: document.getElementById('lesson-start').value,
-      end: document.getElementById('lesson-end').value,
-    });
+    
+    subjectName = subjectName.trim();
+    
+    const container = document.getElementById('lesson-slots-container');
+    const slots = container.querySelectorAll('.lesson-slot');
+    
+    if (editId) {
+      // Modifying single lesson
+      const slot = slots[0];
+      const lessonIndex = lessons.findIndex(l => l.id === editId);
+      if (lessonIndex > -1) {
+        lessons[lessonIndex] = {
+          id: editId,
+          subject: subjectName,
+          day: parseInt(slot.querySelector('.lesson-day-input').value),
+          room: slot.querySelector('.lesson-room-input').value,
+          start: slot.querySelector('.lesson-start-input').value,
+          end: slot.querySelector('.lesson-end-input').value,
+        };
+      }
+    } else {
+      // Adding multiple lessons
+      slots.forEach(slot => {
+        lessons.push({
+          id: Date.now().toString() + Math.random().toString().slice(2, 6),
+          subject: subjectName,
+          day: parseInt(slot.querySelector('.lesson-day-input').value),
+          room: slot.querySelector('.lesson-room-input').value,
+          start: slot.querySelector('.lesson-start-input').value,
+          end: slot.querySelector('.lesson-end-input').value,
+        });
+      });
+    }
+
     lessons.sort((a, b) => {
       if (a.day === b.day) return a.start.localeCompare(b.start);
       return a.day - b.day;
     });
+    
     saveAll('varcity_schedule', lessons);
     formAddLesson.reset();
+    document.getElementById('lesson-edit-id').value = '';
     closeModals();
   });
 
@@ -1375,6 +1404,8 @@ function renderScheduleList() {
       grouped[i].forEach(lesson => {
         const item = document.createElement('div');
         item.className = 'calendar-lesson-card';
+        item.style.cursor = 'pointer';
+        item.setAttribute('onclick', `openLessonModal('${lesson.id}')`);
         item.innerHTML = `
           <div class="calendar-lesson-time">
             <span class="time-start">${lesson.start}</span>
@@ -1384,7 +1415,7 @@ function renderScheduleList() {
             <h4>${lesson.subject}</h4>
             <div class="room"><i class="ri-map-pin-line"></i> ${lesson.room || 'N/A'}</div>
           </div>
-          <button class="icon-btn delete-lesson" data-id="${lesson.id}">
+          <button class="icon-btn delete-lesson" data-id="${lesson.id}" style="display:none;">
             <i class="ri-delete-bin-line"></i>
           </button>
         `;
@@ -1393,15 +1424,6 @@ function renderScheduleList() {
       calendarContainer.appendChild(dayGroup);
     }
   }
-
-  document.querySelectorAll('.delete-lesson').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      if (confirm('Eliminare questa lezione?')) {
-        lessons = lessons.filter(l => l.id !== e.currentTarget.dataset.id);
-        saveAll('varcity_schedule', lessons);
-      }
-    });
-  });
 }
 
 function renderTaxesList() {
@@ -1442,8 +1464,14 @@ function renderTaxesList() {
 }
 
 // Boot
-function openLessonModal() {
+window.openLessonModal = function(editId = null) {
   const subjectSelect = document.getElementById('lesson-subject');
+  const slotsContainer = document.getElementById('lesson-slots-container');
+  const btnAddSlot = document.getElementById('btn-add-lesson-slot');
+  const btnDelete = document.getElementById('btn-delete-lesson');
+  const editIdInput = document.getElementById('lesson-edit-id');
+  const formAddLesson = document.getElementById('form-add-lesson');
+
   if (subjectSelect) {
     subjectSelect.innerHTML = '<option value="" disabled selected>Seleziona una materia...</option>';
     
@@ -1467,7 +1495,126 @@ function openLessonModal() {
       subjectSelect.appendChild(optGroup);
     }
   }
+
+  // Reset slots container
+  slotsContainer.innerHTML = '';
+  
+  if (editId) {
+    // Edit mode
+    const lesson = lessons.find(l => l.id === editId);
+    if (!lesson) return;
+    
+    editIdInput.value = editId;
+    subjectSelect.value = lesson.subject;
+    // se non c'è, è un "Altro..." non in lista, quindi forziamo la creazione di un'option
+    if (!subjectSelect.value && subjectSelect) {
+      const customOpt = document.createElement('option');
+      customOpt.value = lesson.subject;
+      customOpt.textContent = lesson.subject;
+      customOpt.selected = true;
+      subjectSelect.appendChild(customOpt);
+    }
+
+    addLessonSlot(lesson);
+    btnAddSlot.style.display = 'none';
+    btnDelete.style.display = 'block';
+  } else {
+    // Create mode
+    editIdInput.value = '';
+    formAddLesson.reset();
+    addLessonSlot();
+    btnAddSlot.style.display = 'block';
+    btnDelete.style.display = 'none';
+  }
+
   modalAddLesson.classList.add('open');
 }
+
+function addLessonSlot(data = null) {
+  const container = document.getElementById('lesson-slots-container');
+  const slotDiv = document.createElement('div');
+  slotDiv.className = 'lesson-slot';
+  slotDiv.style.cssText = 'background: var(--bg-main); padding: 1rem; border-radius: 12px; margin-bottom: 1rem; border: 1px solid var(--border-color); position: relative;';
+  
+  slotDiv.innerHTML = `
+    <button type="button" class="btn-remove-slot icon-btn" style="position: absolute; top: 0.5rem; right: 0.5rem; display: none; color: var(--danger-color);" aria-label="Rimuovi orario">
+      <i class="ri-close-line"></i>
+    </button>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Giorno</label>
+        <select class="minimal-select lesson-day-input" required>
+          <option value="1">Lunedì</option>
+          <option value="2">Martedì</option>
+          <option value="3">Mercoledì</option>
+          <option value="4">Giovedì</option>
+          <option value="5">Venerdì</option>
+          <option value="6">Sabato</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Aula</label>
+        <input type="text" class="lesson-room-input" required placeholder="es. Aula 3" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Ora Inizio</label>
+        <input type="time" class="lesson-start-input" required />
+      </div>
+      <div class="form-group">
+        <label>Ora Fine</label>
+        <input type="time" class="lesson-end-input" required />
+      </div>
+    </div>
+  `;
+  
+  if (data) {
+    slotDiv.querySelector('.lesson-day-input').value = data.day;
+    slotDiv.querySelector('.lesson-room-input').value = data.room;
+    slotDiv.querySelector('.lesson-start-input').value = data.start;
+    slotDiv.querySelector('.lesson-end-input').value = data.end;
+  }
+  
+  slotDiv.querySelector('.btn-remove-slot').addEventListener('click', () => {
+    slotDiv.remove();
+    updateSlotRemoveButtons();
+  });
+  
+  container.appendChild(slotDiv);
+  updateSlotRemoveButtons();
+}
+
+function updateSlotRemoveButtons() {
+  const container = document.getElementById('lesson-slots-container');
+  const slots = container.querySelectorAll('.lesson-slot');
+  slots.forEach(slot => {
+    const btn = slot.querySelector('.btn-remove-slot');
+    if (slots.length > 1) {
+      btn.style.display = 'block';
+    } else {
+      btn.style.display = 'none';
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btnAddSlot = document.getElementById('btn-add-lesson-slot');
+  if (btnAddSlot) {
+    btnAddSlot.addEventListener('click', () => addLessonSlot());
+  }
+  const btnDeleteLesson = document.getElementById('btn-delete-lesson');
+  if (btnDeleteLesson) {
+    btnDeleteLesson.addEventListener('click', () => {
+      const editId = document.getElementById('lesson-edit-id').value;
+      if (editId) {
+        lessons = lessons.filter(l => l.id !== editId);
+        saveAll('varcity_schedule', lessons);
+        updateUI();
+        closeModals();
+      }
+    });
+  }
+});
 
 init();
