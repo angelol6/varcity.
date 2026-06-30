@@ -105,7 +105,10 @@
                   <input type="number" id="quick-sim-grade" placeholder="Voto" min="18" max="30" />
                   <input type="number" id="quick-sim-credits" placeholder="CFU" min="1" max="20" />
                 </div>
-                <button id="btn-quick-sim" class="btn-primary btn-small">Calcola</button>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                  <button id="btn-quick-sim" class="btn-primary btn-small" style="flex: 2;">Calcola</button>
+                  <button id="btn-quick-sim-reset" class="btn-outline btn-small" style="flex: 1; padding: 0;">Azzera</button>
+                </div>
                 <p class="sim-quick-result" id="quick-sim-result">Nuova media: -</p>
               </div>
             </div>
@@ -142,7 +145,7 @@
         <!-- View: Study Plan (Curriculum Unificato) -->
         <section id="view-plan" class="view-section">
           <div class="section-header">
-            <h2>Piano Completo</h2>
+            <h2>Piano.</h2>
             <div style="display:flex; gap:0.5rem; align-items:center;">
               <button class="icon-btn" id="btn-toggle-reorder" aria-label="Modalità riordino" title="Attiva/Disattiva Riordino">
                 <i class="ri-list-check-2"></i>
@@ -163,7 +166,7 @@
         <!-- View: Schedule -->
         <section id="view-schedule" class="view-section">
           <div class="section-header">
-            <h2>Orario Lezioni</h2>
+            <h2>Orario Lezioni.</h2>
             <button class="icon-btn" id="btn-add-lesson" aria-label="Aggiungi lezione"><i class="ri-add-line"></i></button>
           </div>
           <div class="list-container" id="schedule-list">
@@ -174,7 +177,7 @@
         <!-- View: Taxes -->
         <section id="view-taxes" class="view-section">
           <div class="section-header">
-            <h2>Tasse e Retribuzioni</h2>
+            <h2>Tasse.</h2>
             <button class="icon-btn" id="btn-add-tax" aria-label="Aggiungi Tassa"><i class="ri-add-line"></i></button>
           </div>
           <div class="list-container" id="taxes-list">
@@ -360,7 +363,10 @@
         <form id="form-add-lesson" class="minimal-form">
           <div class="form-group">
             <label>Materia</label>
-            <input type="text" id="lesson-subject" required placeholder="Nome materia" />
+            <select id="lesson-subject" class="minimal-select" required>
+              <!-- Populated dynamically from curriculum -->
+              <option value="" disabled selected>Seleziona una materia...</option>
+            </select>
           </div>
           <div class="form-row">
             <div class="form-group">

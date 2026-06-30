@@ -691,7 +691,7 @@ function setupModals() {
     modalImportPdf.classList.remove('open');
   });
   
-  document.getElementById('btn-add-lesson').addEventListener('click', () => openModal(modalAddLesson));
+  document.getElementById('btn-add-lesson').addEventListener('click', openLessonModal);
   document.getElementById('btn-add-tax').addEventListener('click', () => openModal(modalAddTax));
   document.getElementById('btn-settings').addEventListener('click', () => openModal(modalSettings));
 
@@ -748,9 +748,14 @@ function setupModals() {
 
   formAddLesson.addEventListener('submit', (e) => {
     e.preventDefault();
+    let subjectName = document.getElementById('lesson-subject').value;
+    if (subjectName === 'Altro...') {
+      subjectName = prompt("Inserisci il nome della materia:");
+      if (!subjectName || subjectName.trim() === '') return;
+    }
     lessons.push({
       id: Date.now().toString(),
-      subject: document.getElementById('lesson-subject').value,
+      subject: subjectName.trim(),
       day: parseInt(document.getElementById('lesson-day').value),
       room: document.getElementById('lesson-room').value,
       start: document.getElementById('lesson-start').value,
@@ -874,6 +879,15 @@ function setupSimulator() {
     const newStats = calculateStats(simExams);
     quickSimResult.textContent = `Nuova media: ${newStats.weightedGpa.toFixed(2)}`;
   });
+
+  const btnQuickSimReset = document.getElementById('btn-quick-sim-reset');
+  if (btnQuickSimReset) {
+    btnQuickSimReset.addEventListener('click', () => {
+      document.getElementById('quick-sim-grade').value = '';
+      document.getElementById('quick-sim-credits').value = '';
+      quickSimResult.textContent = 'Nuova media: -';
+    });
+  }
 }
 
 // --- Widgets ---
@@ -1295,24 +1309,46 @@ function renderScheduleList() {
     return;
   }
   const daysStr = ["", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
-  scheduleList.innerHTML = '';
-  
+  scheduleList.innerHTML = '<div class="calendar-container"></div>';
+  const calendarContainer = scheduleList.querySelector('.calendar-container');
+
+  const grouped = {};
   lessons.forEach(lesson => {
-    const item = document.createElement('div');
-    item.className = 'list-item';
-    item.innerHTML = `
-      <div class="item-info">
-        <h4>${lesson.subject}</h4>
-        <div class="item-meta">${daysStr[lesson.day]} &bull; ${lesson.start} - ${lesson.end} &bull; ${lesson.room}</div>
-      </div>
-      <div>
-        <button class="icon-btn delete-lesson" data-id="${lesson.id}">
-          <i class="ri-delete-bin-line" style="font-size:1.2rem;"></i>
-        </button>
-      </div>
-    `;
-    scheduleList.appendChild(item);
+    if (!grouped[lesson.day]) grouped[lesson.day] = [];
+    grouped[lesson.day].push(lesson);
   });
+
+  for (let i = 1; i <= 6; i++) {
+    if (grouped[i] && grouped[i].length > 0) {
+      const dayGroup = document.createElement('div');
+      dayGroup.className = 'calendar-day-group';
+      
+      const dayHeader = document.createElement('div');
+      dayHeader.className = 'calendar-day-header';
+      dayHeader.innerHTML = `<h3>${daysStr[i]}</h3>`;
+      dayGroup.appendChild(dayHeader);
+
+      grouped[i].forEach(lesson => {
+        const item = document.createElement('div');
+        item.className = 'calendar-lesson-card';
+        item.innerHTML = `
+          <div class="calendar-lesson-time">
+            <span class="time-start">${lesson.start}</span>
+            <span class="time-end">${lesson.end}</span>
+          </div>
+          <div class="calendar-lesson-details">
+            <h4>${lesson.subject}</h4>
+            <div class="room"><i class="ri-map-pin-line"></i> ${lesson.room || 'N/A'}</div>
+          </div>
+          <button class="icon-btn delete-lesson" data-id="${lesson.id}">
+            <i class="ri-delete-bin-line"></i>
+          </button>
+        `;
+        dayGroup.appendChild(item);
+      });
+      calendarContainer.appendChild(dayGroup);
+    }
+  }
 
   document.querySelectorAll('.delete-lesson').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -1362,4 +1398,45 @@ function renderTaxesList() {
 }
 
 // Boot
+function openLessonModal() {
+  const subjectSelect = document.getElementById('lesson-subject');
+  if (subjectSelect) {
+    subjectSelect.innerHTML = '<option value="" disabled selected>Seleziona una materia...</option>';
+    
+    // Add custom option first
+    const otherOption = document.createElement('option');
+    otherOption.value = "Altro...";
+    otherOption.textContent = "Altro... (inserisci manualmente)";
+    subjectSelect.appendChild(otherOption);
+
+    // Populate from curriculum
+    const plannedExams = curriculum.filter(c => (!c.type || c.type === 'standard') && c.status !== 'passed');
+    if (plannedExams.length > 0) {
+      const optGroup = document.createElement('optgroup');
+      optGroup.label = "In Piano di Studi";
+      plannedExams.forEach(exam => {
+        const option = document.createElement('option');
+        option.value = exam.name;
+        option.textContent = exam.name;
+        optGroup.appendChild(option);
+      });
+      subjectSelect.appendChild(optGroup);
+    }
+    
+    const passedExams = curriculum.filter(c => (!c.type || c.type === 'standard') && c.status === 'passed');
+    if (passedExams.length > 0) {
+      const optGroup = document.createElement('optgroup');
+      optGroup.label = "Già superati";
+      passedExams.forEach(exam => {
+        const option = document.createElement('option');
+        option.value = exam.name;
+        option.textContent = exam.name;
+        optGroup.appendChild(option);
+      });
+      subjectSelect.appendChild(optGroup);
+    }
+  }
+  openModal(modalAddLesson);
+}
+
 init();
