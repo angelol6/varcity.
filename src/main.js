@@ -1152,7 +1152,7 @@ function renderCurriculumList() {
   // Sort years
   const years = Object.keys(groupedByYear).sort((a,b) => parseInt(a) - parseInt(b));
 
-  years.forEach(y => {
+  years.forEach((y, yearIndex) => {
     const yearLabel = y == 7 ? 'Fuoricorso' : `${y}° Anno`;
     
     // Create Year Header
