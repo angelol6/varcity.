@@ -299,6 +299,18 @@ function setupAuthListeners() {
         errorMsg.style.display = 'block';
         errorMsg.style.color = '#38bd71';
       } else {
+        // Force update UI locally
+        const { data } = await supabase.auth.getSession();
+        if (data && data.session) {
+          currentUser = data.session.user;
+          await fetchCloudData();
+          const btn = document.getElementById('openAuthModalBtn');
+          const statusContainer = document.getElementById('authStatusContainer');
+          const emailDisplay = document.getElementById('authEmailDisplay');
+          if (btn) btn.style.display = 'none';
+          if (statusContainer) statusContainer.style.display = 'block';
+          if (emailDisplay) emailDisplay.textContent = currentUser.email;
+        }
         closeModals(); // Chiudi il modal al login avvenuto con successo
       }
     }
@@ -414,6 +426,10 @@ function setupSettings() {
     updateUI(); 
   });
 }
+
+window.onerror = function(message, source, lineno, colno, error) {
+  alert("JS Error: " + message + "\nLine: " + lineno);
+};
 
 // --- Modals Logic ---
 const openModal = (modal) => modal.classList.add('open');
