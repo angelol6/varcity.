@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#000000" id="meta-theme-color" />
-    <title>varcity</title>
+    <title>varcity.</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>varcity</title>
+    <title>varcity.</title>
   </head>
   <body>
     <div id="app">
@@ -20,11 +20,8 @@
       <header class="app-header">
         <h1 class="app-title">varcity.</h1>
         <div style="display:flex; gap: 8px;">
-          <button id="theme-toggle" class="icon-btn" aria-label="Toggle Theme">
-            <i class="ri-sun-line" id="theme-icon"></i>
-          </button>
-          <button id="btn-settings" class="icon-btn" aria-label="Impostazioni">
-            <i class="ri-settings-4-line"></i>
+          <button id="btn-theme" class="icon-btn" aria-label="Cambia tema">
+            <i class="ri-moon-line"></i>
           </button>
         </div>
       </header>
@@ -71,9 +68,9 @@
                 <i class="ri-checkbox-circle-line"></i>
               </div>
               <div class="widget-body">
-                <div style="display: flex; align-items: baseline; gap: 4px; margin-bottom: 4px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: baseline; gap: 4px; margin-bottom: 4px; white-space: nowrap;">
                   <span class="widget-value" id="stat-credits" style="margin-bottom: 0; line-height: 1;">0</span>
-                  <span id="stat-credits-total" style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;"></span>
+                  <span id="stat-credits-total" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;"></span>
                 </div>
                 <p class="widget-sub">Conseguiti</p>
               </div>
@@ -85,19 +82,19 @@
                 <h3>Esami</h3>
                 <i class="ri-book-read-line"></i>
               </div>
-              <div class="widget-body">
-                <div style="display: flex; align-items: baseline; gap: 4px; margin-bottom: 4px; flex-wrap: wrap;">
-                  <span class="widget-value" id="stat-exams-count" style="margin-bottom: 0; line-height: 1;">0</span>
-                  <span id="stat-exams-total" style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;"></span>
+                <div class="widget-body">
+                  <div style="display: flex; align-items: baseline; gap: 4px; margin-bottom: 4px; white-space: nowrap;">
+                    <span class="widget-value" id="stat-exams-count" style="margin-bottom: 0; line-height: 1;">0</span>
+                    <span id="stat-exams-total" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;"></span>
+                  </div>
+                  <p class="widget-sub">Superati</p>
                 </div>
-                <p class="widget-sub">Superati</p>
-              </div>
             </div>
 
-            <!-- Widget: Simulatore Rapido -->
+            <!-- Widget: SIMULATORE -->
             <div class="widget widget-large action-widget" id="widget-simulator">
               <div class="widget-header">
-                <h3>Simulatore Rapido</h3>
+                <h3>SIMULATORE</h3>
                 <i class="ri-magic-line"></i>
               </div>
               <div class="widget-body sim-quick">
@@ -166,7 +163,7 @@
         <!-- View: Schedule -->
         <section id="view-schedule" class="view-section">
           <div class="section-header">
-            <h2>Orario Lezioni.</h2>
+            <h2>Lezioni.</h2>
             <button class="icon-btn" id="btn-add-lesson" aria-label="Aggiungi lezione"><i class="ri-add-line"></i></button>
           </div>
           <div class="list-container" id="schedule-list">
@@ -181,10 +178,68 @@
             <button class="icon-btn" id="btn-add-tax" aria-label="Aggiungi Tassa"><i class="ri-add-line"></i></button>
           </div>
           <div class="list-container" id="taxes-list">
-            <div class="empty-state">Nessuna tassa registrata.</div>
+            <div class="empty-state">Nessuna tassa inserita.</div>
+          </div>
+        </section>        <!-- View: Settings -->
+        <section id="view-settings" class="view-section">
+          <div class="section-header">
+            <h2>Impostazioni.</h2>
+          </div>
+          <div class="minimal-form" style="padding: 1rem;">
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label>Il tuo nome</label>
+              <input type="text" id="settings-username" class="minimal-input" placeholder="Come ti chiami?" />
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label>Università</label>
+              <input type="text" id="settings-university" class="minimal-input" placeholder="es. Sapienza" />
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label>Corso di Laurea</label>
+              <input type="text" id="settings-degree-name" class="minimal-input" placeholder="es. Economia Aziendale" />
+            </div>
+
+            <div class="form-group">
+              <label>Valore della Lode (nel calcolo media)</label>
+              <select id="settings-lode-weight" class="minimal-select">
+                <option value="30">30</option>
+                <option value="31">31</option>
+                <option value="32">32</option>
+                <option value="33">33</option>
+              </select>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 2rem;">
+              Il valore assegnato alla lode dipende dal regolamento del tuo Ateneo. Spesso viene calcolata come 30, a volte attribuisce punti extra come 31 o 33.
+            </p>
+            <button type="button" id="btn-save-settings" class="btn-primary w-100 btn-large">Salva Impostazioni</button>
+            
+            <div class="cloud-sync-card" style="margin-top: 2rem; padding: 1.5rem; border-radius: 20px; background: var(--bg-input); border: 1px solid var(--border-color);">
+              <div class="cloud-sync-header" style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem;">
+                <i class="ri-cloud-line" style="font-size: 1.5rem; color: var(--accent);"></i>
+                <h3 style="font-size: 1.1rem; margin: 0;">varcity. Cloud</h3>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5;">
+                Tieni il tuo piano di studi sempre al sicuro. Accedi per sincronizzare i tuoi esami in tempo reale su tutti i tuoi dispositivi.
+              </p>
+              <button id="openAuthModalBtn" class="btn-primary w-100" style="background-image: linear-gradient(135deg, var(--accent), #ff9a9e); border: none; font-weight: 600; padding: 0.8rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <i class="ri-user-add-line"></i> Accedi o Registrati
+              </button>
+              
+              <div id="authStatusContainer" style="margin-top: 1rem; font-size: 0.85rem; display: none; background: rgba(56, 189, 113, 0.1); padding: 1rem; border-radius: 12px; border: 1px solid rgba(56, 189, 113, 0.2);">
+                <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--success-color); margin-bottom: 0.8rem;">
+                  <i class="ri-checkbox-circle-fill" style="font-size: 1.2rem;"></i>
+                  <span style="font-weight: 600; font-size: 0.9rem;">Sincronizzazione attiva</span>
+                </div>
+                <p style="color: var(--text-main); margin-bottom: 1.2rem; font-weight: 500;" id="authEmailDisplay"></p>
+                <button id="logoutBtn" class="w-100" style="background: transparent; color: var(--danger-color); border: 1px solid var(--danger-color); font-size: 0.85rem; padding: 0.6rem; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: all 0.2s;">
+                  <i class="ri-logout-box-r-line"></i> Esci dall'account
+                </button>
+              </div>
+            </div>
           </div>
         </section>
-
       </main>
 
       <!-- Bottom Navigation -->
@@ -199,11 +254,15 @@
         </div>
         <div class="nav-item" data-view="schedule">
           <i class="ri-calendar-event-fill"></i>
-          <span>Orario</span>
+          <span>Lezioni</span>
         </div>
         <div class="nav-item" data-view="taxes">
           <i class="ri-wallet-3-fill"></i>
           <span>Tasse</span>
+        </div>
+        <div class="nav-item" data-view="settings">
+          <i class="ri-settings-3-line"></i>
+          <span>Impo</span>
         </div>
       </nav>
     </div>
@@ -428,69 +487,7 @@
           </div>
           <button type="submit" class="btn-primary w-100 btn-large">Salva Tassa</button>
         </form>
-      </div>
-    </div>
-
-    <!-- Modal for Settings -->
-    <div class="modal-overlay" id="modal-settings">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Impostazioni</h3>
-          <button class="btn-close" id="btn-close-settings"><i class="ri-close-line"></i></button>
-        </div>
-        <div class="minimal-form">
-          <div class="form-group" style="margin-bottom: 1rem;">
-            <label>Il tuo nome</label>
-            <input type="text" id="settings-username" class="minimal-input" placeholder="Come ti chiami?" />
-          </div>
-
-          <div class="form-group" style="margin-bottom: 1rem;">
-            <label>Università</label>
-            <input type="text" id="settings-university" class="minimal-input" placeholder="es. Sapienza" />
-          </div>
-
-          <div class="form-group" style="margin-bottom: 1.5rem;">
-            <label>Corso di Laurea</label>
-            <input type="text" id="settings-degree-name" class="minimal-input" placeholder="es. Economia Aziendale" />
-          </div>
-
-          <div class="form-group">
-            <label>Valore della Lode (nel calcolo media)</label>
-            <select id="settings-lode-weight" class="minimal-select">
-              <option value="30">30</option>
-              <option value="31">31</option>
-              <option value="32">32</option>
-              <option value="33">33</option>
-            </select>
-          </div>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 2rem;">
-            Il valore assegnato alla lode dipende dal regolamento del tuo Ateneo. Spesso viene calcolata come 30, a volte attribuisce punti extra come 31 o 33.
-          </p>
-        </div>
-        <button type="button" id="btn-save-settings" class="btn-primary w-100 btn-large">Salva Impostazioni</button>
-        <div class="cloud-sync-card" style="margin-top: 2rem; padding: 1.5rem; border-radius: 20px; background: var(--bg-input); border: 1px solid var(--border-color);">
-          <div class="cloud-sync-header" style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem;">
-            <i class="ri-cloud-line" style="font-size: 1.5rem; color: var(--accent);"></i>
-            <h3 style="font-size: 1.1rem; margin: 0;">varcity. Cloud</h3>
-          </div>
-          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5;">
-            Tieni il tuo piano di studi sempre al sicuro. Accedi per sincronizzare i tuoi esami in tempo reale su tutti i tuoi dispositivi.
-          </p>
-          <button id="openAuthModalBtn" class="btn-primary w-100" style="background-image: linear-gradient(135deg, var(--accent), #ff9a9e); border: none; font-weight: 600; padding: 0.8rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-            <i class="ri-user-add-line"></i> Accedi o Registrati
-          </button>
-          
-          <div id="authStatusContainer" style="margin-top: 1rem; font-size: 0.85rem; display: none; background: rgba(56, 189, 113, 0.1); padding: 1rem; border-radius: 12px; border: 1px solid rgba(56, 189, 113, 0.2);">
-            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--success-color); margin-bottom: 0.8rem;">
-              <i class="ri-checkbox-circle-fill" style="font-size: 1.2rem;"></i>
-              <span style="font-weight: 600; font-size: 0.9rem;">Sincronizzazione attiva</span>
-            </div>
-            <p style="color: var(--text-main); margin-bottom: 1.2rem; font-weight: 500;" id="authEmailDisplay"></p>
-            <button id="logoutBtn" class="w-100" style="background: transparent; color: var(--danger-color); border: 1px solid var(--danger-color); font-size: 0.85rem; padding: 0.6rem; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: all 0.2s;">
-              <i class="ri-logout-box-r-line"></i> Esci dall'account
-            </button>
-          </div>
-        </div>
+  
       </div>
     </div>
 

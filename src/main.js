@@ -197,7 +197,7 @@ const widgetNextTax = document.getElementById('widget-next-tax');
 const modalAddCurriculum = document.getElementById('modal-add-curriculum');
 const modalAddLesson = document.getElementById('modal-add-lesson');
 const modalAddTax = document.getElementById('modal-add-tax');
-const modalSettings = document.getElementById('modal-settings');
+
 
 // Forms
 const formAddCurriculum = document.getElementById('form-add-curriculum');
@@ -403,7 +403,7 @@ function setupSettings() {
     localStorage.setItem('varcity_university', userUniversity);
     localStorage.setItem('varcity_degree_name', userDegreeName);
     
-    modalSettings.classList.remove('open');
+    
     updateUI(); 
   });
 }
@@ -693,7 +693,7 @@ function setupModals() {
   
   document.getElementById('btn-add-lesson').addEventListener('click', openLessonModal);
   document.getElementById('btn-add-tax').addEventListener('click', () => openModal(modalAddTax));
-  document.getElementById('btn-settings').addEventListener('click', () => openModal(modalSettings));
+  
 
   // Closes
   document.querySelectorAll('.btn-close').forEach(btn => btn.addEventListener('click', closeModals));
@@ -960,12 +960,15 @@ function updateChart() {
     currentCredits += exam.credits;
     currentSum += (exam.isLode ? lodeWeight : exam.grade) * exam.credits;
     
-    labels.push(`Esame ${index + 1}`);
+    labels.push(exam.name);
     dataPoints.push((currentSum / currentCredits).toFixed(2));
   });
 
   const lineColor = currentTheme === 'dark' ? '#ffffff' : '#000000';
   const gridColor = currentTheme === 'dark' ? '#2c2c2c' : '#e5e5ea';
+  const tooltipBg = currentTheme === 'dark' ? '#2c2c2c' : '#ffffff';
+  const tooltipText = currentTheme === 'dark' ? '#ffffff' : '#000000';
+  const tooltipBorder = currentTheme === 'dark' ? '#38383a' : '#e5e5ea';
 
   if (trendChartInstance) {
     trendChartInstance.destroy();
@@ -983,9 +986,10 @@ function updateChart() {
         borderWidth: 3,
         pointBackgroundColor: lineColor,
         pointRadius: 0,
-        pointHitRadius: 10,
+        pointHoverRadius: 6,
+        pointHitRadius: 15,
         fill: false,
-        tension: 0.4,
+        tension: 0.5,
         borderCapStyle: 'round',
         borderJoinStyle: 'round'
       }]
@@ -994,7 +998,24 @@ function updateChart() {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { display: false }
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: tooltipBg,
+          titleColor: tooltipText,
+          bodyColor: tooltipText,
+          titleFont: { size: 13, family: 'Inter' },
+          bodyFont: { size: 14, weight: 'bold', family: 'Inter' },
+          borderColor: tooltipBorder,
+          borderWidth: 1,
+          padding: 12,
+          displayColors: false,
+          cornerRadius: 12,
+          callbacks: {
+            label: function(context) {
+              return context.parsed.y.toFixed(2);
+            }
+          }
+        }
       },
       scales: {
         y: {
@@ -1114,7 +1135,7 @@ function renderCurriculumList() {
     // Create Year Header
     const yearHeader = document.createElement('h2');
     yearHeader.className = 'year-header';
-    yearHeader.style.marginTop = '2rem';
+    yearHeader.style.marginTop = (yearIndex === 0) ? '0' : '2rem';
     yearHeader.style.marginBottom = '1rem';
     yearHeader.style.fontSize = '1.4rem';
     yearHeader.style.color = 'var(--text-main)';
@@ -1436,7 +1457,7 @@ function openLessonModal() {
       subjectSelect.appendChild(optGroup);
     }
   }
-  openModal(modalAddLesson);
+  modalAddLesson.classList.add('open');
 }
 
 init();
