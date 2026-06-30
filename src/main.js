@@ -825,13 +825,21 @@ function calculateStats(currArray) {
   let sumGrades = 0;
   let countForGpa = 0;
   let passedCount = 0;
+  
+  let globalTotalCredits = 0;
+  let globalTotalExamsCount = 0;
 
   currArray.forEach(item => {
+    globalTotalCredits += item.credits;
+    if (!item.type || item.type === 'standard') {
+      globalTotalExamsCount++;
+    }
+
     if (item.status === 'passed') {
       totalCredits += item.credits;
-      passedCount++;
       
       if (!item.type || item.type === 'standard') {
+        passedCount++;
         creditsForGpa += item.credits;
         const calcGrade = (item.isLode) ? lodeWeight : item.grade;
         sumWeighted += calcGrade * item.credits;
@@ -844,7 +852,14 @@ function calculateStats(currArray) {
   const weightedGpa = creditsForGpa > 0 ? (sumWeighted / creditsForGpa) : 0;
   const arithmeticGpa = countForGpa > 0 ? (sumGrades / countForGpa) : 0;
   
-  return { totalCredits, count: passedCount, weightedGpa, arithmeticGpa };
+  return { 
+    totalCredits, 
+    count: passedCount, 
+    weightedGpa, 
+    arithmeticGpa, 
+    globalTotalCredits, 
+    globalTotalExamsCount 
+  };
 }
 
 // --- Quick Simulator ---
@@ -953,9 +968,12 @@ function updateChart() {
         backgroundColor: lineColor,
         borderWidth: 3,
         pointBackgroundColor: lineColor,
-        pointRadius: 4,
+        pointRadius: 0,
+        pointHitRadius: 10,
         fill: false,
-        tension: 0.2
+        tension: 0.4,
+        borderCapStyle: 'round',
+        borderJoinStyle: 'round'
       }]
     },
     options: {
@@ -1043,8 +1061,11 @@ function updateStats() {
   const stats = calculateStats(curriculum);
   statWeighted.textContent = stats.weightedGpa.toFixed(2);
   statArithmetic.textContent = `Aritmetica: ${stats.arithmeticGpa.toFixed(2)}`;
-  statCredits.textContent = stats.totalCredits;
-  statExamsCount.textContent = stats.count;
+  const cfuPercent = stats.globalTotalCredits > 0 ? Math.round((stats.totalCredits / stats.globalTotalCredits) * 100) : 0;
+  const examsPercent = stats.globalTotalExamsCount > 0 ? Math.round((stats.count / stats.globalTotalExamsCount) * 100) : 0;
+  
+  statCredits.innerHTML = `${stats.totalCredits} <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 400;">/ ${stats.globalTotalCredits} (${cfuPercent}%)</span>`;
+  statExamsCount.innerHTML = `${stats.count} <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 400;">/ ${stats.globalTotalExamsCount} (${examsPercent}%)</span>`;
 }
 
 function renderCurriculumList() {

@@ -426,6 +426,8 @@ h1, h2, h3, h4 {
 .modal-content {
   width: 100%;
   max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
   background-color: var(--bg-main);
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
