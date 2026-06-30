@@ -1460,8 +1460,8 @@ function openLessonModal() {
       optGroup.label = "In Piano di Studi";
       plannedExams.forEach(exam => {
         const option = document.createElement('option');
-        option.value = exam.name;
-        option.textContent = exam.name;
+        option.value = exam.subject;
+        option.textContent = exam.subject;
         optGroup.appendChild(option);
       });
       subjectSelect.appendChild(optGroup);
