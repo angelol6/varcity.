@@ -260,6 +260,15 @@ function setupAuthListeners() {
     modal.classList.add('open');
   });
 
+  const togglePasswordVisibility = document.getElementById('togglePasswordVisibility');
+  if (togglePasswordVisibility && passwordInput) {
+    togglePasswordVisibility.addEventListener('click', () => {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      togglePasswordVisibility.className = type === 'password' ? 'ri-eye-line' : 'ri-eye-off-line';
+    });
+  }
+
   const handleAuth = async (isSignUp) => {
     errorMsg.style.display = 'none';
     const email = emailInput.value;

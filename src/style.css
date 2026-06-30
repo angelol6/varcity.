@@ -480,6 +480,8 @@ h1, h2, h3, h4 {
 .minimal-form input[type="text"],
 .minimal-form input[type="number"],
 .minimal-form input[type="date"],
+.minimal-form input[type="email"],
+.minimal-form input[type="password"],
 .minimal-form .minimal-select {
   width: 100%;
   padding: 16px;
