@@ -86,10 +86,14 @@ async function saveAll(key, data) {
             unconfirmed: item.unconfirmed || false
           }));
           const { error } = await supabase.from('curriculum').insert(insertData);
-          if (error) console.error('Errore nel salvataggio su Supabase:', error);
+          if (error) {
+            console.error('Errore nel salvataggio su Supabase:', error);
+            alert("Errore salvataggio Cloud: " + error.message + "\nAssicurati che la tabella 'curriculum' esista e abbia tutte le colonne necessarie.");
+          }
         }
-      } catch (err) {
-        console.error('Eccezione durante il sync:', err);
+      } catch (e) {
+        console.error('Eccezione Supabase:', e);
+        alert("Eccezione Cloud: " + e.message);
       }
     }
   }
@@ -101,6 +105,7 @@ async function fetchCloudData() {
   const { data, error } = await supabase.from('curriculum').select('*').eq('user_id', currentUser.id);
   if (error) {
     console.error('Errore nel recupero dati:', error);
+    alert("Errore caricamento Cloud: " + error.message + "\nLa tabella 'curriculum' esiste?");
     return;
   }
   
