@@ -1344,7 +1344,7 @@ function renderCurriculumList() {
         ? `<div style="font-size:0.85rem; color:var(--text-secondary); margin-top:2px;"><i class="ri-user-line"></i> ${item.professor}</div>`
         : '';
 
-      const metaHtml = item.status === 'passed' 
+      const mainMeta = item.status === 'passed' 
         ? `${formattedDate} &bull; ${item.credits} CFU`
         : `${item.credits} CFU`;
 
