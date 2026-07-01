@@ -379,7 +379,7 @@ function setupAuthListeners() {
       if(isSignUp) {
         errorMsg.textContent = "Controlla la tua email per confermare l'account!";
         errorMsg.style.display = 'block';
-        errorMsg.style.color = '#38bd71';
+        errorMsg.style.color = 'var(--text-main)';
       } else {
         // Force update UI locally
         const { data } = await supabase.auth.getSession();
@@ -1083,7 +1083,7 @@ function updateNextTaxWidget() {
   const next = unpaid[0]; // Already sorted
   const formattedDate = new Date(next.date).toLocaleDateString('it-IT');
   const isOverdue = new Date(next.date) < new Date();
-  const color = isOverdue ? 'color: #ff3b30;' : 'color: var(--accent);';
+  const color = isOverdue ? 'color: var(--text-main); font-weight: 800; text-decoration: underline;' : 'color: var(--text-main);';
 
   widgetNextTax.innerHTML = `
     <div class="lesson-preview">
@@ -1112,12 +1112,12 @@ function updateChart() {
     currentCredits += exam.credits;
     currentSum += (exam.isLode ? lodeWeight : exam.grade) * exam.credits;
     
-    labels.push(exam.name);
+    labels.push(exam.subject);
     dataPoints.push((currentSum / currentCredits).toFixed(2));
   });
 
   const lineColor = currentTheme === 'dark' ? '#ffffff' : '#000000';
-  const gridColor = currentTheme === 'dark' ? '#2c2c2c' : '#e5e5ea';
+  const gridColor = 'transparent';
   const tooltipBg = currentTheme === 'dark' ? '#2c2c2c' : '#ffffff';
   const tooltipText = currentTheme === 'dark' ? '#ffffff' : '#000000';
   const tooltipBorder = currentTheme === 'dark' ? '#38383a' : '#e5e5ea';
@@ -1134,8 +1134,8 @@ function updateChart() {
         label: 'Media Ponderata',
         data: dataPoints,
         borderColor: lineColor,
-        backgroundColor: lineColor,
-        borderWidth: 3,
+        backgroundColor: 'transparent',
+        borderWidth: 2,
         pointBackgroundColor: lineColor,
         pointRadius: 0,
         pointHoverRadius: 6,
@@ -1161,7 +1161,7 @@ function updateChart() {
           borderWidth: 1,
           padding: 12,
           displayColors: false,
-          cornerRadius: 12,
+          cornerRadius: 0,
           callbacks: {
             label: function(context) {
               return context.parsed.y.toFixed(2);
@@ -1355,7 +1355,7 @@ function renderCurriculumList() {
         : `${item.credits} CFU`;
 
       const unconfirmedBadge = item.unconfirmed 
-        ? `<span style="display:inline-block; font-size:0.65rem; background-color:var(--accent); color:var(--accent-inverse); padding:2px 6px; border-radius:12px; margin-left:8px; vertical-align:middle;">In attesa di conferma</span>` 
+        ? `<span style="display:inline-block; font-size:0.65rem; background-color:var(--text-main); color:var(--bg-main); padding:2px 6px; border-radius:0; margin-left:8px; vertical-align:middle;">In attesa di conferma</span>` 
         : '';
 
       const dragHandle = isReorderMode 
@@ -1541,7 +1541,7 @@ function renderTaxesList() {
     const item = document.createElement('div');
     item.className = 'list-item';
     const formattedDate = new Date(tax.date).toLocaleDateString('it-IT');
-    const statusIcon = tax.paid ? '<i class="ri-checkbox-circle-fill" style="color:var(--accent);"></i>' : '<i class="ri-error-warning-line" style="color:#ff3b30;"></i>';
+    const statusIcon = tax.paid ? '<i class="ri-checkbox-circle-fill" style="color:var(--text-main);"></i>' : '<i class="ri-error-warning-line" style="color:var(--text-main);"></i>';
     
     item.innerHTML = `
       <div class="item-info" onclick="openTaxModal('${tax.id}')" style="cursor:pointer; flex:1;">
@@ -1653,7 +1653,7 @@ function addLessonSlot(data = null) {
   const container = document.getElementById('lesson-slots-container');
   const slotDiv = document.createElement('div');
   slotDiv.className = 'lesson-slot';
-  slotDiv.style.cssText = 'background: var(--bg-main); padding: 1rem; border-radius: 12px; margin-bottom: 1rem; border: 1px solid var(--border-color); position: relative;';
+  slotDiv.style.cssText = 'background: var(--bg-main); padding: 1rem; border-radius: 0; margin-bottom: 1rem; border: 1px solid var(--border-color); position: relative;';
   
   slotDiv.innerHTML = `
     <button type="button" class="btn-remove-slot icon-btn" style="position: absolute; top: 0.5rem; right: 0.5rem; display: none; color: var(--danger-color);" aria-label="Rimuovi orario">
