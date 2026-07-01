@@ -123,8 +123,7 @@ async function saveAll(key, data) {
           username: data.userName || '',
           university: data.userUniversity || '',
           degree_name: data.userDegreeName || '',
-          lode_weight: data.lodeWeight || 30,
-          theme: data.currentTheme || 'dark'
+          lode_weight: data.lodeWeight || 30
         });
         if (error) console.error('Errore salvataggio settings:', error);
       }
@@ -204,13 +203,8 @@ async function fetchCloudData() {
     localStorage.setItem('varcity_degree_name', userDegreeName);
     localStorage.setItem('varcity_lode_weight', lodeWeight);
     
-    if (setData.theme) {
-      currentTheme = setData.theme;
-      applyTheme(currentTheme);
-    }
     setupSettings(); // re-init inputs
-  } else {
-    saveAll('varcity_settings', { userName, userUniversity, userDegreeName, lodeWeight, currentTheme });
+    saveAll('varcity_settings', { userName, userUniversity, userDegreeName, lodeWeight });
   }
 
   updateUI();
@@ -504,7 +498,7 @@ function setupSettings() {
     localStorage.setItem('varcity_university', userUniversity);
     localStorage.setItem('varcity_degree_name', userDegreeName);
     
-    saveAll('varcity_settings', { userName, userUniversity, userDegreeName, lodeWeight, currentTheme });
+    saveAll('varcity_settings', { userName, userUniversity, userDegreeName, lodeWeight });
     updateUI(); 
   });
 }
@@ -1350,12 +1344,12 @@ function renderCurriculumList() {
         ? `<div style="font-size:0.85rem; color:var(--text-secondary); margin-top:2px;"><i class="ri-user-line"></i> ${item.professor}</div>`
         : '';
 
-      const mainMeta = item.status === 'passed' 
-        ? `${item.credits} CFU &bull; ${formattedDate}`
+      const metaHtml = item.status === 'passed' 
+        ? `${formattedDate} &bull; ${item.credits} CFU`
         : `${item.credits} CFU`;
 
       const unconfirmedBadge = item.unconfirmed 
-        ? `<span style="display:inline-block; font-size:0.65rem; background-color:var(--text-main); color:var(--bg-main); padding:2px 6px; border-radius:0; margin-left:8px; vertical-align:middle;">In attesa di conferma</span>` 
+        ? `<span style="display:inline-block; font-size:0.65rem; background-color:var(--text-main); color:var(--bg-main); padding:2px 6px; border-radius:12px; margin-left:8px; vertical-align:middle;">In attesa di conferma</span>` 
         : '';
 
       const dragHandle = isReorderMode 
@@ -1368,11 +1362,7 @@ function renderCurriculumList() {
         el.dataset.id = item.id;
       }
 
-      const quickPassBtn = item.status === 'planned' && !isReorderMode
-        ? `<button class="icon-btn pass-curr" data-id="${item.id}" title="Segna come superato" style="padding:0; min-height:0; width:28px; height:28px;">
-             <i class="ri-checkbox-circle-line" style="font-size:1.3rem; color:var(--accent);"></i>
-           </button>`
-        : '';
+      const quickPassBtn = '';
 
       el.innerHTML = `
         ${dragHandle}
@@ -1541,11 +1531,11 @@ function renderTaxesList() {
     const item = document.createElement('div');
     item.className = 'list-item';
     const formattedDate = new Date(tax.date).toLocaleDateString('it-IT');
-    const statusIcon = tax.paid ? '<i class="ri-checkbox-circle-fill" style="color:var(--text-main);"></i>' : '<i class="ri-error-warning-line" style="color:var(--text-main);"></i>';
+    const statusText = tax.paid ? '<span style="font-size: 0.8rem; font-weight: normal;">(Pagata)</span>' : '<span style="font-size: 0.8rem; font-weight: bold; text-decoration: underline;">(Da pagare)</span>';
     
     item.innerHTML = `
       <div class="item-info" onclick="openTaxModal('${tax.id}')" style="cursor:pointer; flex:1;">
-        <h4>${tax.desc} ${statusIcon}</h4>
+        <h4>${tax.desc} ${statusText}</h4>
         <div class="item-meta">Scadenza: ${formattedDate}</div>
       </div>
       <div style="display:flex; align-items:center; gap: 1rem;">
