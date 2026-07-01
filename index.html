@@ -319,6 +319,11 @@
             <input type="text" id="input-subject" required placeholder="Nome materia" />
           </div>
 
+          <div class="form-group">
+            <label>Docente (opzionale)</label>
+            <input type="text" id="input-professor" placeholder="es. Prof. Rossi" />
+          </div>
+
           <div class="form-row" id="grade-row">
             <div class="form-group">
               <label>Voto</label>
@@ -477,10 +482,11 @@
     <div class="modal-overlay" id="modal-add-tax">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>Nuova Tassa</h3>
+          <h3 id="modal-tax-title">Nuova Tassa</h3>
           <button class="btn-close" id="btn-close-tax"><i class="ri-close-line"></i></button>
         </div>
         <form id="form-add-tax" class="minimal-form">
+          <input type="hidden" id="tax-edit-id" />
           <div class="form-group">
             <label>Descrizione</label>
             <input type="text" id="tax-desc" required placeholder="es. Seconda Rata" />
@@ -499,7 +505,10 @@
             <input type="checkbox" id="tax-paid" />
             <label for="tax-paid">Già pagata</label>
           </div>
-          <button type="submit" class="btn-primary w-100 btn-large">Salva Tassa</button>
+          <div style="display:flex; gap: 1rem; margin-top: 1rem;">
+            <button type="button" class="btn-large" id="btn-delete-tax" style="display:none; background-color: var(--warning); color:#fff; border:none; border-radius:20px; font-weight:700; cursor:pointer; width: 100%;">Elimina</button>
+            <button type="submit" class="btn-primary w-100 btn-large">Salva Tassa</button>
+          </div>
         </form>
   
       </div>

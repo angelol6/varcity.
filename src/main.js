@@ -64,9 +64,8 @@ async function saveAll(key, data) {
 
   // If logged in, sync to Supabase
   if (currentUser && supabase) {
-    if (key === 'varcity_curriculum') {
-      try {
-        // Delete existing items for user and insert new ones
+    try {
+      if (key === 'varcity_curriculum') {
         await supabase.from('curriculum').delete().eq('user_id', currentUser.id);
         
         if (data.length > 0) {
@@ -83,18 +82,54 @@ async function saveAll(key, data) {
             is_lode: item.isLode,
             date: item.date,
             appelli: item.appelli || '',
-            unconfirmed: item.unconfirmed || false
+            unconfirmed: item.unconfirmed || false,
+            professor: item.professor || ''
           }));
           const { error } = await supabase.from('curriculum').insert(insertData);
-          if (error) {
-            console.error('Errore nel salvataggio su Supabase:', error);
-            alert("Errore salvataggio Cloud: " + error.message + "\nAssicurati che la tabella 'curriculum' esista e abbia tutte le colonne necessarie.");
-          }
+          if (error) console.error('Errore nel salvataggio su Supabase (curriculum):', error);
         }
-      } catch (e) {
-        console.error('Eccezione Supabase:', e);
-        alert("Eccezione Cloud: " + e.message);
+      } else if (key === 'varcity_schedule') {
+        await supabase.from('schedule').delete().eq('user_id', currentUser.id);
+        if (data.length > 0) {
+          const insertData = data.map(item => ({
+            id: item.id,
+            user_id: currentUser.id,
+            subject: item.subject,
+            day: item.day,
+            room: item.room,
+            start_time: item.start,
+            end_time: item.end
+          }));
+          const { error } = await supabase.from('schedule').insert(insertData);
+          if (error) console.error('Errore salvataggio schedule:', error);
+        }
+      } else if (key === 'varcity_taxes') {
+        await supabase.from('taxes').delete().eq('user_id', currentUser.id);
+        if (data.length > 0) {
+          const insertData = data.map(item => ({
+            id: item.id,
+            user_id: currentUser.id,
+            desc: item.desc,
+            amount: item.amount,
+            date: item.date,
+            paid: item.paid
+          }));
+          const { error } = await supabase.from('taxes').insert(insertData);
+          if (error) console.error('Errore salvataggio taxes:', error);
+        }
+      } else if (key === 'varcity_settings') {
+        const { error } = await supabase.from('settings').upsert({
+          user_id: currentUser.id,
+          username: data.userName || '',
+          university: data.userUniversity || '',
+          degree_name: data.userDegreeName || '',
+          lode_weight: data.lodeWeight || 30,
+          theme: data.currentTheme || 'dark'
+        });
+        if (error) console.error('Errore salvataggio settings:', error);
       }
+    } catch (e) {
+      console.error('Eccezione Supabase:', e);
     }
   }
 }
@@ -102,16 +137,10 @@ async function saveAll(key, data) {
 async function fetchCloudData() {
   if (!currentUser || !supabase) return;
   
-  const { data, error } = await supabase.from('curriculum').select('*').eq('user_id', currentUser.id);
-  if (error) {
-    console.error('Errore nel recupero dati:', error);
-    alert("Errore caricamento Cloud: " + error.message + "\nLa tabella 'curriculum' esiste?");
-    return;
-  }
-  
-  if (data && data.length > 0) {
-    // Override local with cloud data
-    curriculum = data.map(item => ({
+  // Curriculum
+  const { data: currData, error: currErr } = await supabase.from('curriculum').select('*').eq('user_id', currentUser.id);
+  if (currData && currData.length > 0) {
+    curriculum = currData.map(item => ({
       id: item.id,
       status: item.status,
       type: item.type,
@@ -123,15 +152,68 @@ async function fetchCloudData() {
       isLode: item.is_lode,
       date: item.date,
       appelli: item.appelli,
-      unconfirmed: item.unconfirmed
+      unconfirmed: item.unconfirmed,
+      professor: item.professor
     }));
     localStorage.setItem('varcity_curriculum', JSON.stringify(curriculum));
-    updateUI();
-  } else if (curriculum.length > 0) {
-    // First login: cloud is empty but local has data -> sync local UP to cloud
-    console.log('Migrating local data to cloud...');
+  } else if (curriculum.length > 0 && !currErr) {
     saveAll('varcity_curriculum', curriculum);
   }
+
+  // Schedule
+  const { data: schedData } = await supabase.from('schedule').select('*').eq('user_id', currentUser.id);
+  if (schedData && schedData.length > 0) {
+    lessons = schedData.map(item => ({
+      id: item.id,
+      subject: item.subject,
+      day: item.day,
+      room: item.room,
+      start: item.start_time,
+      end: item.end_time
+    }));
+    localStorage.setItem('varcity_schedule', JSON.stringify(lessons));
+  } else if (lessons.length > 0) {
+    saveAll('varcity_schedule', lessons);
+  }
+
+  // Taxes
+  const { data: taxData } = await supabase.from('taxes').select('*').eq('user_id', currentUser.id);
+  if (taxData && taxData.length > 0) {
+    taxes = taxData.map(item => ({
+      id: item.id,
+      desc: item.desc,
+      amount: item.amount,
+      date: item.date,
+      paid: item.paid
+    }));
+    localStorage.setItem('varcity_taxes', JSON.stringify(taxes));
+  } else if (taxes.length > 0) {
+    saveAll('varcity_taxes', taxes);
+  }
+
+  // Settings
+  const { data: setData } = await supabase.from('settings').select('*').eq('user_id', currentUser.id).single();
+  if (setData) {
+    userName = setData.username || '';
+    userUniversity = setData.university || '';
+    userDegreeName = setData.degree_name || '';
+    lodeWeight = setData.lode_weight || 30;
+    
+    localStorage.setItem('varcity_username', userName);
+    localStorage.setItem('varcity_university', userUniversity);
+    localStorage.setItem('varcity_degree_name', userDegreeName);
+    localStorage.setItem('varcity_lode_weight', lodeWeight);
+    
+    if (setData.theme) {
+      currentTheme = setData.theme;
+      applyTheme(currentTheme);
+    }
+    setupSettings(); // re-init inputs
+  } else {
+    saveAll('varcity_settings', { userName, userUniversity, userDegreeName, lodeWeight, currentTheme });
+  }
+
+  updateUI();
 }
 
 async function checkAuth() {
@@ -422,7 +504,7 @@ function setupSettings() {
     localStorage.setItem('varcity_university', userUniversity);
     localStorage.setItem('varcity_degree_name', userDegreeName);
     
-    
+    saveAll('varcity_settings', { userName, userUniversity, userDegreeName, lodeWeight, currentTheme });
     updateUI(); 
   });
 }
@@ -715,7 +797,7 @@ function setupModals() {
   });
   
   document.getElementById('btn-add-lesson').addEventListener('click', () => window.openLessonModal());
-  document.getElementById('btn-add-tax').addEventListener('click', () => openModal(modalAddTax));
+  document.getElementById('btn-add-tax').addEventListener('click', () => window.openTaxModal());
   
 
   // Closes
@@ -753,7 +835,8 @@ function setupModals() {
       isLode: isLode,
       date: status === 'passed' ? inputDate.value : null,
       appelli: status === 'planned' ? inputAppelli.value : '',
-      unconfirmed: status === 'planned' ? inputUnconfirmed.checked : false
+      unconfirmed: status === 'planned' ? inputUnconfirmed.checked : false,
+      professor: document.getElementById('input-professor').value || ''
     };
 
     if (editingId) {
@@ -824,17 +907,33 @@ function setupModals() {
 
   formAddTax.addEventListener('submit', (e) => {
     e.preventDefault();
-    taxes.push({
-      id: Date.now().toString(),
-      desc: document.getElementById('tax-desc').value,
-      amount: parseFloat(document.getElementById('tax-amount').value),
-      date: document.getElementById('tax-date').value,
-      paid: document.getElementById('tax-paid').checked
-    });
+    const editId = document.getElementById('tax-edit-id').value;
+    const desc = document.getElementById('tax-desc').value;
+    const amount = parseFloat(document.getElementById('tax-amount').value);
+    const date = document.getElementById('tax-date').value;
+    const paid = document.getElementById('tax-paid').checked;
+
+    if (editId) {
+      taxes = taxes.map(t => t.id === editId ? { id: editId, desc, amount, date, paid } : t);
+    } else {
+      taxes.push({
+        id: Date.now().toString(),
+        desc, amount, date, paid
+      });
+    }
+
     taxes.sort((a, b) => new Date(a.date) - new Date(b.date));
     saveAll('varcity_taxes', taxes);
-    formAddTax.reset();
     closeModals();
+  });
+
+  document.getElementById('btn-delete-tax').addEventListener('click', () => {
+    const editId = document.getElementById('tax-edit-id').value;
+    if (editId && confirm('Eliminare questa tassa?')) {
+      taxes = taxes.filter(t => t.id !== editId);
+      saveAll('varcity_taxes', taxes);
+      closeModals();
+    }
   });
 }
 
@@ -850,6 +949,7 @@ window.editCurriculumItem = function(id) {
   inputSemester.value = item.semester !== undefined ? item.semester : 1;
   inputSubject.value = item.subject;
   inputCredits.value = item.credits;
+  document.getElementById('input-professor').value = item.professor || '';
   
   if (item.status === 'passed') {
     if (item.grade) inputGrade.value = item.isLode ? 30 : item.grade;
@@ -1245,6 +1345,10 @@ function renderCurriculumList() {
       const appelliHtml = item.status === 'planned' && item.appelli 
         ? `<div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">Appelli: ${item.appelli}</div>` 
         : '';
+        
+      const profHtml = item.professor
+        ? `<div style="font-size:0.85rem; color:var(--text-secondary); margin-top:2px;"><i class="ri-user-line"></i> ${item.professor}</div>`
+        : '';
 
       const mainMeta = item.status === 'passed' 
         ? `${item.credits} CFU &bull; ${formattedDate}`
@@ -1274,6 +1378,7 @@ function renderCurriculumList() {
         ${dragHandle}
         <div class="item-info" ${!isReorderMode ? `onclick="editCurriculumItem('${item.id}')"` : ''} style="${!isReorderMode ? 'cursor:pointer;' : ''} flex: 1;">
           <h4>${item.subject}${unconfirmedBadge}</h4>
+          ${profHtml}
           <div class="item-meta">${mainMeta}</div>
           ${appelliHtml}
         </div>
@@ -1439,29 +1544,43 @@ function renderTaxesList() {
     const statusIcon = tax.paid ? '<i class="ri-checkbox-circle-fill" style="color:var(--accent);"></i>' : '<i class="ri-error-warning-line" style="color:#ff3b30;"></i>';
     
     item.innerHTML = `
-      <div class="item-info">
+      <div class="item-info" onclick="openTaxModal('${tax.id}')" style="cursor:pointer; flex:1;">
         <h4>${tax.desc} ${statusIcon}</h4>
         <div class="item-meta">Scadenza: ${formattedDate}</div>
       </div>
       <div style="display:flex; align-items:center; gap: 1rem;">
         <div class="item-value" style="font-size: 1.2rem;">€${tax.amount.toFixed(2)}</div>
-        <button class="icon-btn delete-tax" data-id="${tax.id}">
-          <i class="ri-delete-bin-line" style="font-size:1.2rem;"></i>
-        </button>
       </div>
     `;
     taxesList.appendChild(item);
   });
-
-  document.querySelectorAll('.delete-tax').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      if (confirm('Eliminare questa tassa?')) {
-        taxes = taxes.filter(t => t.id !== e.currentTarget.dataset.id);
-        saveAll('varcity_taxes', taxes);
-      }
-    });
-  });
 }
+
+window.openTaxModal = function(id = null) {
+  const formAddTax = document.getElementById('form-add-tax');
+  const editIdInput = document.getElementById('tax-edit-id');
+  const btnDelete = document.getElementById('btn-delete-tax');
+  const title = document.getElementById('modal-tax-title');
+
+  if (id) {
+    const tax = taxes.find(t => t.id === id);
+    if (!tax) return;
+    
+    title.textContent = "Modifica Tassa";
+    editIdInput.value = id;
+    document.getElementById('tax-desc').value = tax.desc;
+    document.getElementById('tax-amount').value = tax.amount;
+    document.getElementById('tax-date').value = tax.date;
+    document.getElementById('tax-paid').checked = tax.paid;
+    btnDelete.style.display = 'block';
+  } else {
+    title.textContent = "Nuova Tassa";
+    editIdInput.value = '';
+    formAddTax.reset();
+    btnDelete.style.display = 'none';
+  }
+  document.getElementById('modal-add-tax').classList.add('open');
+};
 
 // Boot
 window.openLessonModal = function(editId = null) {
