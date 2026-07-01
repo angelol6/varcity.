@@ -33,6 +33,10 @@
         <section id="view-dashboard" class="view-section active">
           <div class="greeting-section" style="margin-bottom: 2rem;">
             <h2 id="greeting-text" style="margin-bottom: 0.2rem; font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px;">Overview.</h2>
+            <div id="widget-user-info" style="display:none; align-items:center; gap:6px; background:var(--bg-main); padding:6px 12px; border-radius:20px; font-size:0.75rem; font-weight:600; color:var(--text-main); border:1px solid var(--border-color); width:fit-content; margin-top: 0.5rem;">
+              <i class="ri-graduation-cap-line" style="font-size:1rem; color:var(--text-main);"></i>
+              <span id="widget-user-text" style="opacity: 0.9;"></span>
+            </div>
           </div>
 
           <div class="widget-grid">
@@ -45,11 +49,7 @@
               <div class="widget-body">
                 <p class="widget-value highlight" id="stat-weighted-gpa">0.00</p>
                 <p class="widget-sub" id="stat-arithmetic-gpa" style="margin-bottom: 12px;">Aritmetica: 0.00</p>
-                
-                <div id="widget-user-info" style="display:none; align-items:center; gap:6px; background:var(--bg-color); padding:6px 12px; border-radius:20px; font-size:0.75rem; font-weight:600; color:var(--text-main); border:1px solid var(--border-color); width:fit-content; margin-top: auto;">
-                  <i class="ri-graduation-cap-line" style="font-size:1rem; color:var(--accent);"></i>
-                  <span id="widget-user-text" style="opacity: 0.9;"></span>
-                </div>
+
               </div>
             </div>
 
@@ -185,10 +185,18 @@
           <div class="section-header">
             <h2>Impostazioni.</h2>
           </div>
-          <div class="minimal-form" style="padding: 1rem;">
-            <div class="form-group" style="margin-bottom: 1rem;">
-              <label>Il tuo nome</label>
+          <div class="minimal-form" style="margin-bottom: 2rem;">
+            <div class="form-group">
+              <label for="settings-username">Nome (opzionale)</label>
               <input type="text" id="settings-username" class="minimal-input" placeholder="Come ti chiami?" />
+            </div>
+            <div class="form-group">
+              <label for="settings-gender">Genere</label>
+              <select id="settings-gender" class="minimal-select">
+                <option value="M">Uomo</option>
+                <option value="F">Donna</option>
+                <option value="O">Altro</option>
+              </select>
             </div>
 
             <div class="form-group" style="margin-bottom: 1rem;">
@@ -260,7 +268,7 @@
           <i class="ri-settings-3-line"></i>
         </div>
       </nav>
-      <div style="position: fixed; bottom: 80px; width: 100%; text-align: center; font-size: 10px; color: var(--text-muted); z-index: 1000; pointer-events: none;">v1.4.2 - Terminal Edition</div>
+      <div style="position: fixed; bottom: 80px; width: 100%; text-align: center; font-size: 10px; color: var(--text-muted); z-index: 1000; pointer-events: none;">v1.4.3 - Terminal Edition</div>
     </div>
 
     <!-- Modal for adding curriculum item -->

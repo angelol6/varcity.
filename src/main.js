@@ -52,6 +52,7 @@ let taxes = JSON.parse(localStorage.getItem('varcity_taxes')) || [];
 let currentTheme = localStorage.getItem('varcity_theme') || 'dark';
 let lodeWeight = parseInt(localStorage.getItem('varcity_lode_weight')) || 31;
 let userName = localStorage.getItem('varcity_username') || '';
+let userGender = localStorage.getItem('varcity_gender') || 'M';
 let userUniversity = localStorage.getItem('varcity_university') || '';
 let userDegreeName = localStorage.getItem('varcity_degree_name') || '';
 
@@ -478,22 +479,26 @@ function setupCurriculumFormToggles() {
 // --- Settings Logic ---
 function setupSettings() {
   const selectLode = document.getElementById('settings-lode-weight');
+  const selectGender = document.getElementById('settings-gender');
   const inputUsername = document.getElementById('settings-username');
   const inputUniversity = document.getElementById('settings-university');
   const inputDegreeName = document.getElementById('settings-degree-name');
   
   selectLode.value = lodeWeight.toString();
+  selectGender.value = userGender;
   inputUsername.value = userName;
   inputUniversity.value = userUniversity;
   inputDegreeName.value = userDegreeName;
 
   document.getElementById('btn-save-settings').addEventListener('click', () => {
     lodeWeight = parseInt(selectLode.value);
+    userGender = selectGender.value;
     userName = inputUsername.value.trim();
     userUniversity = inputUniversity.value.trim();
     userDegreeName = inputDegreeName.value.trim();
     
     localStorage.setItem('varcity_lode_weight', lodeWeight);
+    localStorage.setItem('varcity_gender', userGender);
     localStorage.setItem('varcity_username', userName);
     localStorage.setItem('varcity_university', userUniversity);
     localStorage.setItem('varcity_degree_name', userDegreeName);
@@ -1195,6 +1200,11 @@ function setupChartToggle() {
       icon.style.transform = isChartExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
       icon.style.transition = 'transform 0.3s ease';
     }
+    
+    if (trendChartInstance) {
+      trendChartInstance.options.scales.y.ticks.stepSize = isChartExpanded ? 2 : 6;
+      trendChartInstance.update();
+    }
 
     // Resize chart after container animation
     setTimeout(() => {
@@ -1213,7 +1223,10 @@ function updateUI() {
   const widgetUserText = document.getElementById('widget-user-text');
   
   if (userName) {
-    greetingEl.textContent = `Bentornato, ${userName}.`;
+    let greetingWord = 'Bentornato';
+    if (userGender === 'F') greetingWord = 'Bentornata';
+    else if (userGender === 'O') greetingWord = 'Bentornatə';
+    greetingEl.textContent = `${greetingWord}, ${userName}.`;
   } else {
     greetingEl.textContent = 'Overview.';
   }
