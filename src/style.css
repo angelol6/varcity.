@@ -266,7 +266,7 @@ h1, h2, h3, h4 {
 
 .btn-small {
   padding: 10px 16px;
-  border-radius: 0;
+  border-radius: 12px;
   font-size: 0.9rem;
 }
 
@@ -521,7 +521,7 @@ h1, h2, h3, h4 {
 .minimal-form input[type="checkbox"] {
   width: 20px;
   height: 20px;
-  accent-color: var(--accent);
+  accent-color: #888888;
 }
 
 /* Calendar Schedule */

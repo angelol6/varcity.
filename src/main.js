@@ -1131,7 +1131,7 @@ function updateChart() {
         backgroundColor: 'transparent',
         borderWidth: 2,
         pointBackgroundColor: lineColor,
-        pointRadius: 0,
+        pointRadius: 4,
         pointHoverRadius: 6,
         pointHitRadius: 15,
         fill: false,
@@ -1168,7 +1168,7 @@ function updateChart() {
           min: 18,
           max: 30, // MAX 30 come da specifiche
           grid: { color: gridColor },
-          ticks: { color: '#a0a0a0' }
+          ticks: { color: '#a0a0a0', stepSize: 6 }
         },
         x: {
           display: false,
@@ -1365,7 +1365,7 @@ function renderCurriculumList() {
 
       el.innerHTML = `
         ${dragHandle}
-            <div class="item-info" onclick="openCurriculumModal('${item.id}')" style="cursor:pointer; flex:1; min-width:0; padding-right:1rem;">
+            <div class="item-info" onclick="editCurriculumItem('${item.id}')" style="cursor:pointer; flex:1; min-width:0; padding-right:1rem;">
           <h4 style="word-break: break-word;">${item.subject} ${unconfirmedBadge}</h4>
           ${appelliHtml}
           ${profHtml}
@@ -1647,7 +1647,7 @@ function addLessonSlot(data = null) {
   const container = document.getElementById('lesson-slots-container');
   const slotDiv = document.createElement('div');
   slotDiv.className = 'lesson-slot';
-  slotDiv.style.cssText = 'background: var(--bg-main); padding: 1rem; border-radius: 0; margin-bottom: 1rem; border: 1px solid var(--border-color); position: relative;';
+  slotDiv.style.cssText = 'background: var(--bg-main); padding: 1rem; border-radius: 12px; margin-bottom: 1rem; border: 1px solid var(--border-color); position: relative;';
   
   slotDiv.innerHTML = `
     <button type="button" class="btn-remove-slot icon-btn" style="position: absolute; top: 0.5rem; right: 0.5rem; display: none; color: var(--danger-color);" aria-label="Rimuovi orario">
