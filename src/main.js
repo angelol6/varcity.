@@ -1282,11 +1282,10 @@ function renderCurriculumList() {
     const yearHeader = document.createElement('h2');
     yearHeader.className = 'year-header';
     yearHeader.style.marginTop = (yearIndex === 0) ? '0' : '2rem';
-    yearHeader.style.marginBottom = '1rem';
-    yearHeader.style.fontSize = '1.4rem';
     yearHeader.style.color = 'var(--text-main)';
     yearHeader.style.borderBottom = '1px solid var(--border-color)';
     yearHeader.style.paddingBottom = '8px';
+    yearHeader.style.marginBottom = '0.2rem';
     yearHeader.textContent = yearLabel;
     planList.appendChild(yearHeader);
 
@@ -1366,16 +1365,16 @@ function renderCurriculumList() {
 
       el.innerHTML = `
         ${dragHandle}
-        <div class="item-info" ${!isReorderMode ? `onclick="editCurriculumItem('${item.id}')"` : ''} style="${!isReorderMode ? 'cursor:pointer;' : ''} flex: 1;">
-          <h4>${item.subject}${unconfirmedBadge}</h4>
+            <div class="item-info" onclick="openCurriculumModal('${item.id}')" style="cursor:pointer; flex:1; min-width:0; padding-right:1rem;">
+          <h4 style="word-break: break-word;">${item.subject} ${unconfirmedBadge}</h4>
+          ${appelliHtml}
           ${profHtml}
           <div class="item-meta">${mainMeta}</div>
-          ${appelliHtml}
         </div>
         <div style="display:flex; align-items:center; gap: 0.5rem;">
           ${quickPassBtn}
-          <div class="item-value" style="font-size: 1.1rem; margin-right: 0.5rem;">
-            ${item.status === 'passed' ? displayGrade : '<i class="ri-calendar-todo-line"></i>'}
+          <div class="item-value" style="font-size: 1.1rem; margin-right: 0.5rem; white-space: nowrap;">
+            ${item.status === 'passed' ? displayGrade : ''}
           </div>
         </div>
       `;
@@ -1531,11 +1530,16 @@ function renderTaxesList() {
     const item = document.createElement('div');
     item.className = 'list-item';
     const formattedDate = new Date(tax.date).toLocaleDateString('it-IT');
-    const statusText = tax.paid ? '<span style="font-size: 0.8rem; font-weight: normal;">(Pagata)</span>' : '<span style="font-size: 0.8rem; font-weight: bold; text-decoration: underline;">(Da pagare)</span>';
+    const statusText = '';
     
+    if (!tax.paid) {
+      item.style.opacity = '0.6';
+      item.style.borderStyle = 'dashed';
+    }
+
     item.innerHTML = `
-      <div class="item-info" onclick="openTaxModal('${tax.id}')" style="cursor:pointer; flex:1;">
-        <h4>${tax.desc} ${statusText}</h4>
+      <div class="item-info" onclick="openTaxModal('${tax.id}')" style="cursor:pointer; flex:1; min-width:0; padding-right:1rem;">
+        <h4 style="word-break: break-word;">${tax.desc} ${statusText}</h4>
         <div class="item-meta">Scadenza: ${formattedDate}</div>
       </div>
       <div style="display:flex; align-items:center; gap: 1rem;">

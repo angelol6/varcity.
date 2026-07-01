@@ -240,9 +240,9 @@ h1, h2, h3, h4 {
 
 /* Buttons */
 .btn-primary {
-  background-color: var(--accent);
-  color: var(--accent-inverse);
-  border: 1px solid var(--border-color);
+  background-color: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--text-main);
   padding: 14px 24px;
   border-radius: 20px;
   font-weight: 700;
@@ -257,6 +257,11 @@ h1, h2, h3, h4 {
 
 .btn-primary:active {
   transform: scale(0.96);
+}
+
+.btn-primary:hover {
+  background-color: var(--text-main);
+  color: var(--bg-main);
 }
 
 .btn-small {
